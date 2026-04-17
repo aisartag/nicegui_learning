@@ -1,10 +1,10 @@
-import json
-from typing import TypedDict, Literal, NotRequired
-from core.settings import SettingPaths
+import os
+from typing import Literal, NotRequired, TypedDict
+from dotenv import load_dotenv
+from pathlib import Path
 
 LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
-BOOTSTRAP = "bootstrap"
 
 class LoggingConfig(TypedDict):
     filter_by_client: bool
@@ -15,7 +15,9 @@ class LoggingConfig(TypedDict):
 class DatabaseConfig(TypedDict):
     host: str
     port: int
-    username: NotRequired[str]
+    db: str
+    user: NotRequired[str]
+    password: NotRequired[str]
 
 
 class ConfigSchema(TypedDict):
@@ -24,36 +26,20 @@ class ConfigSchema(TypedDict):
     database: NotRequired[DatabaseConfig]
 
 
-class Config:
-    _defaults: ConfigSchema = {
-        "appName": BOOTSTRAP,
-        "logging": {
-            "filter_by_client": True,
-            "log_level": "INFO",
-            "log_file": f"{BOOTSTRAP}.log",
-        },
-    }
+env_path = Path(".") / ".env"
+print(env_path)
+load_dotenv(dotenv_path=env_path)
 
-    _config:ConfigSchema = _defaults
+# appname = os.getenv("APPNAME", "nicegui_logger")
+# print(appname)
 
-    @classmethod
-    def load(cls):
+configuration: ConfigSchema = {
+    "appName": os.getenv("APPNAME", "nicegui"),
+    "logging": {
+        "filter_by_client": True,
+        "log_level": "INFO",
+        "log_file": f"{os.getenv('APPNAME', 'nicegui')}.log",
+    },
+}
 
-        try:
-            if not SettingPaths.CONFIG_FILE.exists():
-                raise FileNotFoundError(
-                    f"File di configurazione {SettingPaths.CONFIG_FILE} non trovato."
-                )
-            with open(SettingPaths.CONFIG_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-        except (json.JSONDecodeError, IOError) as e:
-            raise Exception(e)
-
-        cls._config = cls._defaults | data
-
-    @classmethod
-    def get_config(cls):
-        return cls._config
-    
-
-
+print(configuration)

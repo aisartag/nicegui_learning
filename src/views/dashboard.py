@@ -1,15 +1,15 @@
 from nicegui import ui
 import logging
-from core.config import Config
+from core.config import configuration
 from core.settings import SettingPaths
 
 
 
 
 def render():
-    config = Config().get_config()
     
-    logger = logging.getLogger(f"{config['appName']}.{__name__}")
+    
+    logger = logging.getLogger(f"{configuration['appName']}.{__name__}")
     logger.info("Dashboard avviata")
   
     with ui.row().classes(
@@ -21,13 +21,9 @@ def render():
     source = SettingPaths.get_asset(image_path)
     logger.debug(source)
    
-    ui.label("logging da dashboard")
-    
-       
 
-
-    with ui.card().tight():
-        ui.label("logging da dashboard")
+    with ui.card():
+        ui.label("scheda dashboard").classes("font-bold text-xl")
         ui.image(source)
         with ui.card_section():
             ui.label('Lorem ipsum dolor sit amet, consectetur adipiscing elit, ...')

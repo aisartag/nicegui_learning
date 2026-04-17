@@ -1,19 +1,17 @@
 import sys
 from pathlib import Path
-from  nicegui import ui
-   
+from nicegui import ui
 
 
 # Aggiunge la cartella 'src' al percorso di ricerca di Python
 # ovvero il sys.path.insert(0....) 0 in testa
-src_path = str(Path(__file__).parent / "src" )
+src_path = str(Path(__file__).parent / "src")
 if src_path not in sys.path:
     sys.path.insert(0, src_path)
 
 from core.boot import bootstrap
-from core.logger.logset import LoggerSettings
-from core.config import Config
 from components.layouts.main_layout import layout
+
 
 # Se il bootstrap fallisce, l'app non deve nemmeno provare a partire
 if not bootstrap():
@@ -21,15 +19,7 @@ if not bootstrap():
 
 
 
-def build_ui():
-    
-    
-    Config().load()
 
-    logger = LoggerSettings().setup()
-    logger.info(f"Inizio build_ui: {logger.name}")
+layout()
 
-    layout(logger)
-
-
-ui.run(build_ui, port=8080, title="My App Web")  # type: ignore
+ui.run(layout, port=8080, title="My App Web")  # type: ignore

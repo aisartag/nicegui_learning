@@ -1,10 +1,16 @@
 from nicegui import ui
-from logging import Logger
+import logging
+from core.config import configuration
+from core.logging.logger_settings import LoggerSettings
 from views.dashboard import render as dashboard_render
-from core.logger.logset import LoggerSettings
 
 
-def layout(logger:Logger):
+
+
+def layout():
+
+    logger = logging.getLogger(f"{configuration['appName']}.{__name__}")
+    logger.info("layout avviata")
     with ui.header(elevated=True).classes(
         "bg-slate-800 text-slate-100 items-center px-4 items-center justify-between border-5 border-blue-500"
     ):
@@ -14,8 +20,8 @@ def layout(logger:Logger):
     # views place
     ui.sub_pages({"/": dashboard_render})
 
-    with ui.card().tight():
-        ui.label("logging da layoutd")
+    with ui.card():
+        ui.label("scheda layout").classes("font-bold text-2xl")
         with ui.card_section():
             ui.label('Lorem ipsum dolor sit amet, consectetur adipiscing elit, ...')
         with ui.card_actions():

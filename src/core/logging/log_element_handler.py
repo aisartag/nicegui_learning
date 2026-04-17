@@ -1,6 +1,6 @@
 import logging
 from nicegui import ui
-from core.config import Config
+from core.config import configuration
 
 
 class LogElementHandler(logging.Handler):
@@ -28,7 +28,7 @@ class ClientFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
         # filter_by_client = config["logging"]["filter_by_client"]
         # ui.notify( f"filter_by_client: {filter_by_client}", position='top-right')
-        if not Config.get_config()["logging"]["filter_by_client"]:
+        if not configuration["logging"]["filter_by_client"]:
             return True
         try:
             return ui.context.client.id == self.owner_id
