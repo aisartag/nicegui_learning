@@ -1,0 +1,17 @@
+{
+    "include": [
+        "run_web.py",
+        "src"
+    ],
+    "extraPaths": [
+        "./src"
+    ],
+    "executionEnvironments": [
+        {
+            "root": "src"
+        }
+    ],
+    "typeCheckingMode": "strict",
+    "pythonVersion": "3.12",
+    "pythonPlatform": "All"
+}

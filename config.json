@@ -1,0 +1,13 @@
+{
+    "appName": "nicegui_logger",
+    "logging": {
+        "filter_by_client": true,
+        "log_level": "INFO",
+        "log_file": "app_history.log"
+    },
+    "database": {
+        "host": "localhost",
+        "port": 5432,
+        "username": "admin" 
+    }
+}
