@@ -3,7 +3,7 @@ import logging
 from logging import Logger
 from logging.handlers import RotatingFileHandler
 from core.config import configuration
-from core.logging.log_element_handler import LogElementHandler,ClientFilter
+from core.logging.log_element_handler import LogElementHandler, ClientFilter
 
 
 class LoggerSettings:
@@ -16,7 +16,6 @@ class LoggerSettings:
 
     @classmethod
     def setup(cls):
-
         if not cls._logger.handlers:
             log_file = configuration["logging"]["log_file"]
             fh = RotatingFileHandler(
@@ -34,7 +33,7 @@ class LoggerSettings:
             cls._logger.addHandler(fh)  # Scrive su file
             cls._logger.addHandler(ch)
 
-        cls._logger.info("LoggerSettings completato con successo!")
+        cls._logger.critical("LoggerSettings completato con successo!")
         return cls._logger
 
     @classmethod
@@ -45,7 +44,6 @@ class LoggerSettings:
         """
         # 1. Crea l'handler collegato all'elemento UI
         handler = LogElementHandler(log_element)
-        
 
         ui_formatter = logging.Formatter("[%(levelname)s] %(name)15s: %(message)s")
         handler.setFormatter(ui_formatter)
@@ -61,3 +59,25 @@ class LoggerSettings:
         ui.context.client.on_disconnect(lambda: cls._logger.removeHandler(handler))  # type: ignore
 
         # return handler
+
+
+def setup_logging():
+    import logging.config
+    import yaml
+
+    try:
+        with open("logging_config.yaml", "r") as f:
+            config = yaml.safe_load(f.read())
+
+        # Estraiamo lo strapuntino prima di passare il resto al logging
+        global log_settings
+        log_settings = config.get('config_extra', {})
+        print(f"Log settings: {log_settings}")
+
+        # Aggiungi il tuo "strapuntino" personalizzato
+        # config['config_extra']['filter_by_client'] = True
+        # print(config)
+
+        logging.config.dictConfig(config)
+    except Exception as e:
+        print(f"Errore durante la configurazione del logging: {e}")

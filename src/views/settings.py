@@ -7,13 +7,14 @@ from core.log_loader import configExtra
 logger = logging.getLogger(f"{configExtra['root_name']}.{__name__}")
 
 
-def DashboardView():
-    logger.info(f"Dashboard avviata:{ui.context.client.id}")
+def SettingsView():
+    logger.info(f"Settings avviata:{ui.context.client.id}")
     
   
     with ui.row().classes(
         "w-[60vw] justify-center items-center border-3 border-blue-600 bg-gray-300 p-4"):
-        ui.label("Dashboard")
+        ui.label("Settings")
+
 
     with ui.card():
         # ui.label("scheda dashboard").classes("font-bold text-xl")

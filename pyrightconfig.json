@@ -1,8 +1,7 @@
 {
-    "include": [
-        "run_web.py",
-        "src"
-    ],
+    "include": ["start_web.py","src/**/*.py", "tests/**/*.py"],
+    "exclude": ["**/node_modules/**", "**/__pycache__/**", "**/.*", ".venv.3.13"],
+   
     "extraPaths": [
         "./src"
     ],
@@ -12,6 +11,6 @@
         }
     ],
     "typeCheckingMode": "strict",
-    "pythonVersion": "3.12",
+    "pythonVersion": "3.13",
     "pythonPlatform": "All"
 }

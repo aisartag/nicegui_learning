@@ -1,5 +1,5 @@
 import os
-from typing import Literal, NotRequired, TypedDict
+from typing import Literal, NotRequired, TypedDict, cast
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -36,10 +36,10 @@ load_dotenv(dotenv_path=env_path)
 configuration: ConfigSchema = {
     "appName": os.getenv("APPNAME", "nicegui"),
     "logging": {
-        "filter_by_client": True,
-        "log_level": "INFO",
+        "filter_by_client": os.getenv("FILTER_BY_CLIENT", False) == True,
+        "log_level": cast(LogLevel, os.getenv("LOG_LEVEL", "INFO")),
         "log_file": f"{os.getenv('APPNAME', 'nicegui')}.log",
     },
 }
 
-print(configuration)
+# print(configuration)
