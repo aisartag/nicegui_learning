@@ -23,4 +23,8 @@ root_logger.info("Inizio esecuzione")
 
 
 if __name__ in {"__main__", "__mp_main__"}:
+<<<<<<< HEAD
     ui.run(root, host="0.0.0.0", port=8000, storage_secret="pippa", reload=True)  # type: ignore
+=======
+    ui.run(root, title="Nicegui learning", host="0.0.0.0", port=8000, reload=True, storage_secret="pizzeche")  # type: ignore
+>>>>>>> dev
