@@ -2,18 +2,18 @@ from nicegui import ui
 import logging
 from core.log_loader import configExtra
 
-
+NAME= 'Home'
 
 logger = logging.getLogger(f"{configExtra['root_name']}.{__name__}")
 
 
-def SettingsView():
-    logger.info(f"Settings avviata:{ui.context.client.id}")
+def HomeView():
+    logger.info(f"{NAME} avviata:{ui.context.client.id}")
     
   
     with ui.row().classes(
-        "w-[60vw] justify-center items-center border-3 border-blue-600  p-4"):
-        ui.label("Settings")
+        "w-[60vw] justify-center items-center border-3 border-blue-600 p-4"):
+        ui.label(NAME)
 
 
     with ui.card():
@@ -22,7 +22,7 @@ def SettingsView():
         with ui.card_section():
             ui.label('Lorem ipsum dolor sit amet, consectetur adipiscing elit, ...')
         with ui.card_actions():
-            ui.button('Invia Info', on_click=lambda: logger.info(f"Un messaggio informativo da dashboard:{ui.context.client.id}"))
-            ui.button('Invia Errore', on_click=lambda: logger.error(f"Qualcosa è andato storto! da dashboard:{ui.context.client.id}"))
+            ui.button('Invia Info', on_click=lambda: logger.info(f"Un messaggio informativo da {NAME}:{ui.context.client.id}"))
+            ui.button('Invia Errore', on_click=lambda: logger.error(f"Qualcosa è andato storto! da {NAME}:{ui.context.client.id}"))
 
     

@@ -7,12 +7,12 @@ from core.log_loader import configExtra
 logger = logging.getLogger(f"{configExtra['root_name']}.{__name__}")
 
 
-def SettingsView():
-    logger.info(f"Settings avviata:{ui.context.client.id}")
+def LoginView():
+    logger.info(f"Login avviata:{ui.context.client.id}")
     
   
     with ui.row().classes(
-        "w-[60vw] justify-center items-center border-3 border-blue-600  p-4"):
+        "w-[60vw] justify-center items-center border-3 border-blue-600 p-4"):
         ui.label("Settings")
 
 

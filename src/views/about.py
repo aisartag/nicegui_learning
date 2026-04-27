@@ -7,13 +7,13 @@ from core.log_loader import configExtra
 logger = logging.getLogger(f"{configExtra['root_name']}.{__name__}")
 
 
-def SettingsView():
+def AboutView():
     logger.info(f"Settings avviata:{ui.context.client.id}")
     
   
     with ui.row().classes(
         "w-[60vw] justify-center items-center border-3 border-blue-600  p-4"):
-        ui.label("Settings")
+        ui.label("About")
 
 
     with ui.card():
@@ -22,7 +22,7 @@ def SettingsView():
         with ui.card_section():
             ui.label('Lorem ipsum dolor sit amet, consectetur adipiscing elit, ...')
         with ui.card_actions():
-            ui.button('Invia Info', on_click=lambda: logger.info(f"Un messaggio informativo da dashboard:{ui.context.client.id}"))
-            ui.button('Invia Errore', on_click=lambda: logger.error(f"Qualcosa è andato storto! da dashboard:{ui.context.client.id}"))
+            ui.button('Invia Info', on_click=lambda: logger.info(f"Un messaggio informativo da about:{ui.context.client.id}"))
+            ui.button('Invia Errore', on_click=lambda: logger.error(f"Qualcosa è andato storto! da about:{ui.context.client.id}"))
 
     
