@@ -26,14 +26,14 @@ async def root():
 
     logger.info(f"Inizio esecuzione root.{configExtra['filter_by_client']}")
 
-    layout = Layout()
+    Layout()
 
-    ui.sub_pages(layout.get_router_root_views())
+   
 
     # on path changed
-    ui.context.client.sub_pages_router.on_path_changed(
-        lambda path: layout.handle_path_change(path)
-    )
+    # ui.context.client.sub_pages_router.on_path_changed(
+    #     lambda path: layout.handle_path_change(path)
+    # )
 
     # area log
     log_widget = ui.log(max_lines=50).classes("w-full h-40")

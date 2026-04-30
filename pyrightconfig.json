@@ -1,6 +1,6 @@
 {
     "include": ["start_web.py","src/**/*.py", "tests/**/*.py"],
-    "exclude": ["**/node_modules/**", "**/__pycache__/**", "**/.*", ".venv.3.13"],
+    "exclude": ["**/node_modules/**", "**/__pycache__/**", "**/.*", ".venv"],
    
     "extraPaths": [
         "./src"

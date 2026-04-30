@@ -1,27 +1,29 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Literal, TypedDict, List
+from typing import TypedDict, List
 
 
 
 
+from views.dashboard_main import DashboardMain
 from views.profile_view import ProfileView
 from views.security_view import SecurityView
 
 from views.report_view import ReportView
+from views.settings_main import SettingsMain
 from views.statistics_view import StatisticsView
 
 
-from .paths_type import PATHS_ROOT
+from .paths_type import PATHS_ROOT, PATHS_CHILDRENS
 
-PATHS_CHILDRENS: Literal["/dashboard/report", "/dashboard/statistics", "/settings/security", "/settings/profile"]
 
-# PATHS_CHILDRENS: Literal["/report", "/statistics", "/security", "/profile"]
+
+
 
 
 class TypedRouteChildrenValue(TypedDict):
-    path: str
+    path: PATHS_CHILDRENS
     label: str
     icon: str
     component: Callable[[], None]
@@ -38,14 +40,21 @@ ROUTES_ROOT_CHILDREN: List[TypedRouteChildren] = [
         "root": "/dashboard",
         "childrens":  [
             {
-                "path": "/dashboard/report",
+                "path": "/",
+                "label": "Dashboard Main",
+                "icon": "",
+                "component": DashboardMain,
+                
+            },
+            {
+                "path": "/report",
                 "label": "Report",
                 "icon": "report",
                 "component": ReportView,
                 
             },
             {
-                "path": "/dashboard/statistics",
+                "path": "/statistics",
                 "label": "Statistics",
                 "icon": "statistics",
                 "component": StatisticsView,
@@ -56,15 +65,22 @@ ROUTES_ROOT_CHILDREN: List[TypedRouteChildren] = [
     {
         "root": "/settings",
         "childrens":  [
+              {
+                "path": "/",
+                "label": "SettingsMain",
+                "icon": "",
+                "component": SettingsMain,
+                
+            },
             {
-                "path": "/settings/security",
+                "path": "/security",
                 "label": "Security",
                 "icon": "security",
                 "component": SecurityView,
                 
             },
             {
-                "path": "/settings/profile",
+                "path": "/profile",
                 "label": "Profile",
                 "icon": "profile",
                 "component": ProfileView,
