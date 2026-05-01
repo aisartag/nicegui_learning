@@ -1,6 +1,9 @@
+import logging
 from typing import Literal, cast, Any, Dict, get_args
 from nicegui import ui
+from core.log_loader import configExtra
 
+logger = logging.getLogger(f"{configExtra['root_name']}.{__name__}")
 
 # Definiamo i valori ammessi per il tema (Literal è perfetto per Pyright Strict)
 ThemeLiteral = Literal["light", "dark", "auto"]
@@ -38,7 +41,8 @@ class ThemeManager:
         return self.ICONS[self.mode]
 
     def apply(self) -> None:
-        # 3. Ora Pyright sa esattamente cosa contiene self.mode
+        # ui.notify(f"Applying theme mode: {self.mode}", position="top")
+        logger.info(f"Applying theme mode: {self.mode}")
         if self.mode == "light":
             ui.dark_mode().disable()
         elif self.mode == "dark":

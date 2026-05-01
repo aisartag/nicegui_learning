@@ -19,8 +19,8 @@ def HomeView():
                     ui.label(NAME)
                 
             with ui.card_actions():
-                ui.button('Invia Info', on_click=lambda: logger.info(f"Un messaggio informativo da {NAME}"))
-                ui.button('Invia Errore', on_click=lambda: logger.error(f"Qualcosa è andato storto! da {NAME}"))
+                ui.button('Invia Info', color="primary", on_click=lambda: logger.info(f"Un messaggio informativo da {NAME}"))
+                ui.button('Invia Errore', color="critical", on_click=lambda: logger.error(f"Qualcosa è andato storto! da {NAME}"))
 
 
     

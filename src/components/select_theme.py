@@ -23,7 +23,7 @@ def theme_choice(manager:ThemeManager):
             ui.notify(f"{e.value} non previsto")
 
     # Options as a list of strings
-    select = ui.select(options=options, value=manager.mode, on_change=update_mode).classes('w-40')
+    select = ui.select(options=options, value=manager.mode, on_change=update_mode).classes('w-32')
 
     select.add_slot('option', '''
         <q-item v-bind="props.itemProps">

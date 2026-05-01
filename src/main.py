@@ -1,11 +1,23 @@
-from nicegui import ui
+from nicegui import ui, app
 import logging
 
 from core.log_loader import configExtra
 from core.log_element_handler import LogElementHandler, ClientFilter
 
 
-from layout import Layout
+from components.layout import Layout
+
+app.colors(
+    primary="#5898d4",
+    secondary="#26a69a",
+    accent="#9c27b0",
+    dark="#1d1d1d",
+    dark_page="#121212",
+    positive="#21ba45",
+    negative="#c10015",
+    info="#31ccec",
+    warning="#f2c037",
+)
 
 
 formatter = logging.Formatter(
@@ -29,12 +41,6 @@ async def root():
     Layout()
 
    
-
-    # on path changed
-    # ui.context.client.sub_pages_router.on_path_changed(
-    #     lambda path: layout.handle_path_change(path)
-    # )
-
     # area log
     log_widget = ui.log(max_lines=50).classes("w-full h-40")
     handler = LogElementHandler(log_widget)
