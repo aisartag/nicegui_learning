@@ -6,7 +6,7 @@ from routing.main_root import ROUTES_ROOT
 
 def get_header_popup(theme_manager: ThemeManager):
     
-    with ui.dialog().props("position=right") as dialog:
+    with ui.dialog().props('position=right backdrop-filter="blur(8px) brightness(40%)"') as dialog:
 
         def handle_click(path: str):
             ui.navigate.to(path)
