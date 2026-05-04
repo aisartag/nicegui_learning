@@ -1,4 +1,4 @@
-from nicegui import ui, app
+from nicegui import Client, ui, app
 import logging
 
 from core.log_loader import configExtra
@@ -30,13 +30,17 @@ logger = logging.getLogger(f"{configExtra['root_name']}.{__name__}")
 root_logger = logging.getLogger(configExtra["root_name"])
 
 
-async def root():
+async def root(client:Client):
 
+    # await client.connected()
+    
     logger.info(
         f"Root avviato - log filter_by_client:{configExtra['filter_by_client']}"
     )
 
     logger.info(f"Inizio esecuzione root.{configExtra['filter_by_client']}")
+
+    ui.add_head_html('<meta name="darkreader-lock">')
 
     Layout()
 

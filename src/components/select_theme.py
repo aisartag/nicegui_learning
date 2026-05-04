@@ -1,11 +1,16 @@
 from typing import cast, get_args
 
-from nicegui import ui, events  
+from nicegui import ui, events
 from themes.theme_manager import ThemeLiteral, ThemeManager
 #  from typing import TypeVar, Any
 
-def theme_choice(manager:ThemeManager):
+import logging
+from core.log_loader import configExtra
 
+logger = logging.getLogger(f"{configExtra['root_name']}.{__name__}")
+
+def theme_choice(manager:ThemeManager):
+    logger.info(f"theme_choice avviato: {ui.context.client.id}")
     options = {
         "light": {"label": "Chiaro", "icon": "light_mode"},
         "dark": {"label": "Scuro", "icon": "dark_mode"},
@@ -21,6 +26,7 @@ def theme_choice(manager:ThemeManager):
             manager.mode = cast( ThemeLiteral, e.value) # Errore se e.value
         else:
             ui.notify(f"{e.value} non previsto")
+        
 
     # Options as a list of strings
     select = ui.select(options=options, value=manager.mode, on_change=update_mode).classes('w-32')
