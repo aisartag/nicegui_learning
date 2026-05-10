@@ -4,12 +4,13 @@ from pathlib import Path
 
 class ProjectPaths:
     # Determina la root del progetto (2 livelli sopra questo file, assumendo sia in utility/paths.py)
-    ROOT = Path(__file__).resolve().parent.parent.parent
+    ROOT = Path(__file__).resolve().parent.parent.parent.parent
+    APPROOT= Path(__file__).resolve().parent.parent.parent 
 
     DATA = ROOT / "data"
     LOGS = ROOT / "logs"
     MODELS = ROOT / "models"
-    CONFIGS = ROOT / "configs"
+    CONFIGS = APPROOT / "configs"
 
     @classmethod
     def ensure_dirs(cls) -> None | str:

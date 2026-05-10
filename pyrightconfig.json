@@ -1,13 +1,13 @@
 {
-    "include": ["start_web.py","src/**/*.py", "tests/**/*.py"],
+    "include": ["app"],
     "exclude": ["**/node_modules/**", "**/__pycache__/**", "**/.*", ".venv"],
    
     "extraPaths": [
-        "./src"
+        "./app"
     ],
     "executionEnvironments": [
         {
-            "root": "src"
+            "root": "app"
         }
     ],
     "typeCheckingMode": "strict",

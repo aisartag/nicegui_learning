@@ -1,0 +1,38 @@
+version: 1
+disable_existing_loggers: false
+
+# Il tuo "strapuntino" personalizzato
+config_extra:
+  root_name: "sight"
+  filter_by_client: false  
+  max_ui_lines: 50
+
+formatters:
+  generic:
+    format: "%(asctime)s [%(process)d] [%(levelname)s] %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S %z"
+  standard:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+handlers:
+  console:
+    (): logging.StreamHandler
+    level: DEBUG
+    formatter: standard
+  file:
+    (): logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: generic
+    filename: "placeholder.log"
+    maxBytes: 1048576
+    backupCount: 5
+
+root:
+  level: INFO
+  handlers: [console, file]
+
+loggers:
+  watchfiles.main:
+    level: WARNING
+  uvicorn:         # Spesso utile silenziare anche il server sotto NiceGUI
+    level: WARNING

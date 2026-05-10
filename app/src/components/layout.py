@@ -31,6 +31,9 @@ class Layout:
         # apply_brand_theme()
         self.theme_manager = ThemeManager(app.storage.user)
 
+
+        self.current_path = self.client.request.url.path
+
         with ui.header(elevated=False).classes(
             "items-center px-4 items-center justify-between bg-slate-100 text-slate-800 dark:bg-slate-900  dark:text-blue-200 border-b-2"
         ):
@@ -71,7 +74,7 @@ class Layout:
         with self.drawer:
             ui.label("Menu di navigazione")
 
-        self.handle_path_change(self.get_root_path(self.client.request.url.path))
+        self.handle_path_change(self.get_root_path(self.current_path))
 
         self.client.sub_pages_router.on_path_changed(
             lambda path: self.handle_path_change(path)
@@ -83,6 +86,11 @@ class Layout:
         # if not self.is_root_path(path):
         #     logger.info(f"handle_path_change: {path} non root")
         #     return
+
+        if(path != self.current_path):
+            self.current_path = path
+
+        logger.info(f"handle_path_change: {path}")
 
         childrens = self.get_children_for_path(path)
         logger.info(f"handle_path_change path, children: {path} {childrens}")
@@ -178,11 +186,9 @@ class Layout:
 
         self.is_mobile = is_mobile
         logger.info(f"updated_is_mobile: {self.is_mobile}")
-
-        path = self.get_root_path(self.client.request.url.path)
-
-        childrens = self.get_children_for_path(path)
-        logger.info(f"handle_path_change path, children: {path} {childrens}")
+        
+        childrens = self.get_children_for_path(self.current_path)
+        logger.info(f"updated_is_mobile path, children: {self.current_path} {childrens}")
         if childrens is None:
             return
         

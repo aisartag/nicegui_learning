@@ -8,11 +8,12 @@ import logging
 src_path = str(Path(__file__).parent / "src")
 if src_path not in sys.path:
     sys.path.insert(0, src_path)
+print(sys.path)
 
 # moduli locali
-from core.log_loader import configExtra
-from core.boot import bootstrap
-from main import root
+from src.core.log_loader import configExtra
+from src.core.boot import bootstrap
+from src.main import root
 
 if not bootstrap():
     sys.exit(1)
