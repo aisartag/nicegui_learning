@@ -49,7 +49,7 @@ def get_header_popup(theme_manager: ThemeManager) -> None:
 
     ui.button(icon="more_vert", on_click=dialog.open).props(
         "round flat ripple"
-    ).classes("lt-md text-blue-800 dark:text-blue-200")
+    ).classes("md:hidden text-blue-800 dark:text-blue-200")
 
    
 

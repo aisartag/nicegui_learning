@@ -4,7 +4,7 @@ disable_existing_loggers: false
 # Il tuo "strapuntino" personalizzato
 config_extra:
   root_name: "sight"
-  filter_by_client: false  
+  filter_by_client: true  
   max_ui_lines: 50
 
 formatters:

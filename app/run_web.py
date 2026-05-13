@@ -10,6 +10,8 @@ if src_path not in sys.path:
     sys.path.insert(0, src_path)
 print(sys.path)
 
+
+
 # moduli locali
 from src.core.log_loader import configExtra
 from src.core.boot import bootstrap

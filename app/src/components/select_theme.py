@@ -9,7 +9,7 @@ from core.log_loader import configExtra
 
 logger = logging.getLogger(f"{configExtra['root_name']}.{__name__}")
 
-def theme_choice(manager:ThemeManager):
+def theme_choice(manager:ThemeManager, container:ui.dialog | None = None ):
     logger.info(f"theme_choice avviato: {ui.context.client.id}")
     options = {
         "light": {"label": "Chiaro", "icon": "light_mode"},
@@ -24,6 +24,7 @@ def theme_choice(manager:ThemeManager):
        
         if e.value in get_args(ThemeLiteral): 
             manager.mode = cast( ThemeLiteral, e.value) # Errore se e.value
+            container.close() if container else None
         else:
             ui.notify(f"{e.value} non previsto")
         

@@ -3,11 +3,12 @@
     "exclude": ["**/node_modules/**", "**/__pycache__/**", "**/.*", ".venv"],
    
     "extraPaths": [
-        "./app"
+        "./app/src"
     ],
     "executionEnvironments": [
         {
-            "root": "app"
+            "root":"app"
+          
         }
     ],
     "typeCheckingMode": "strict",

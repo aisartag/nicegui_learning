@@ -10,6 +10,6 @@ logger = logging.getLogger(f"{configExtra['root_name']}.{__name__}")
 
 
 def DashboardMain():
-    logger.info(f"{NAME}avviata:{ui.context.client.id}")
+    logger.info(f"{NAME} avviata:{ui.context.client.id}")
 
    

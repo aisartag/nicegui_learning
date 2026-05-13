@@ -1,7 +1,10 @@
 from nicegui import ui
 import logging
 from core.log_loader import configExtra
-from routing.root_children import ROUTES_ROOT_CHILDREN
+
+
+from routing.route_childrens import ChildrenRegistry
+
 
 NAME="Settings"
 
@@ -23,11 +26,12 @@ def SettingsView():
                 ui.button('Invia Errore', on_click=lambda: logger.error(f"Qualcosa è andato storto! da {NAME}"))
 
 
-    route = next((r for r in ROUTES_ROOT_CHILDREN if r["root"] == '/settings'), None)
-    childrens = route["childrens"] if route is not None else []
-    
-    if len(childrens) > 0:
-        sub_pages = {r["path"]: r["component"] for r in childrens if r["path"]}
-        ui.sub_pages(sub_pages)
+            childrens = ChildrenRegistry.as_nicegui_dict("SETTINGS_CHILDREN")
+            if childrens:
+                ui.sub_pages(childrens)
+            else:
+                logger.warning(
+                    f"non ci sono childrens per {NAME} - {ui.context.client.id}"
+                )
 
     

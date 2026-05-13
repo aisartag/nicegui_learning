@@ -1,11 +1,13 @@
-from nicegui import Client, ui, app
+from nicegui import ui, app
 import logging
 
+from components.layout_master import MasterLayout
 from core.log_loader import configExtra
 from core.log_element_handler import LogElementHandler, ClientFilter
 
-
-from components.layout import Layout
+# from components.layout import Layout
+# from routing.route_childrens import ChildrenRegistry
+# from routing.route_master import MasterRoute
 
 app.colors(
     primary="#5898d4",
@@ -30,23 +32,24 @@ logger = logging.getLogger(f"{configExtra['root_name']}.{__name__}")
 root_logger = logging.getLogger(configExtra["root_name"])
 
 
-async def root(client:Client):
+async def root():
 
     # await client.connected()
-    
+
     logger.info(
         f"Root avviato - log filter_by_client:{configExtra['filter_by_client']}"
     )
 
     logger.info(f"Inizio esecuzione root.{configExtra['filter_by_client']}")
 
-    ui.add_head_html('<meta name="darkreader-lock">')
+    # Layout()
+    MasterLayout()
+    
+    
 
-    Layout()
-
-   
     # area log
-    log_widget = ui.log(max_lines=50).classes("w-full h-40")
+    # with ui.expansion(value=True).classes("w-full h-full"):
+    log_widget = ui.log(max_lines=100).classes("w-full h-40")
     handler = LogElementHandler(log_widget)
     handler.setFormatter(formatter)
 
