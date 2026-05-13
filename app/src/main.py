@@ -42,7 +42,7 @@ async def root():
 
     logger.info(f"Inizio esecuzione root.{configExtra['filter_by_client']}")
 
-    # Layout()
+    
     MasterLayout()
     
     
