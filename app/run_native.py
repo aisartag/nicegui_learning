@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 from nicegui import app, ui, native
 import multiprocessing
+import logging
 
 
 # Configurazione finestra (fuori dal main)
@@ -13,14 +14,17 @@ src_path = str(Path(__file__).parent / "src")
 if src_path not in sys.path:
     sys.path.insert(0, src_path)
 
-from core.boot import bootstrap
-from components.layouts.main_layout import layout
+# moduli locali
+from src.core.log_loader import configExtra
+from src.core.boot import bootstrap
+from src.main import root
 
-
-# Se il bootstrap fallisce, l'app non deve nemmeno provare a partire
 if not bootstrap():
     sys.exit(1)
 
+root_logger = logging.getLogger(configExtra["root_name"])
+root_logger.setLevel(logging.INFO)
+root_logger.info("Inizio esecuzione")
 
 if __name__ in {"__main__", "__mp_main__"}:
     # Necessario per PyInstaller / Nuitka
@@ -28,10 +32,11 @@ if __name__ in {"__main__", "__mp_main__"}:
 
     # Avvio
     ui.run( # type: ignore
-        layout, # Passiamo la funzione che costruisce la UI
+        root, # Passiamo la funzione che costruisce la UI
         native=True, 
         reload=False, # Obbligatorio per EXE
-        title="Unipaths Config", 
+        title="Nicegui learning", 
         port=native.find_open_port(), 
-        window_size=(800, 640)
+        window_size=(800, 640),
+        storage_secret="pizzeche"
     ) 
