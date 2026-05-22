@@ -13,7 +13,6 @@ logger = logging.getLogger(f"{configExtra['root_name']}.{__name__}")
 NAME = "Dashboard"
 
 
-
 def DashboardView():
     logger.info(f"{NAME} avviata:{ui.context.client.id}")
 

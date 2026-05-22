@@ -1,14 +1,12 @@
-from nicegui import Client, ui, app
 import logging
 
 from components.layout_widgets import WidgetsLayout
+from core.log_loader import configExtra
+from nicegui import Client, app, ui
+from routing.route_events import childrens_emitted
 from routing.route_master import MasterRoute
 from themes.theme_manager import ThemeManager
-
-from core.log_loader import configExtra
 from utils.screen_state_old import ScreenState
-
-from routing.route_events import childrens_emitted
 
 logger = logging.getLogger(f"{configExtra['root_name']}.{__name__}")
 
@@ -28,9 +26,7 @@ class MasterLayout:
         self.current_path = self.client.request.url.path
 
         self.drawer: ui.left_drawer = (
-            ui.left_drawer(value=False)
-            .props("bordered")
-            .classes("bg-slate-100 dark:bg-slate-900")
+            ui.left_drawer(value=False).props("bordered").classes("bg-slate-100 dark:bg-slate-900")
         )
         self.header: ui.header = ui.header(elevated=True)
 
@@ -57,19 +53,14 @@ class MasterLayout:
                 .classes("lt-md text-blue-800 dark:text-blue-800 dark:text-blue-200")
             )
 
-           
-
             # brand
             with ui.row().classes("gt-sm items-center tracking-tight"):
-                ui.link(f"Nicegui Learning", "/").classes(
+                ui.link("Nicegui Learning", "/").classes(
                     "font-semibold px-4 py-2 no-underline text-xl text-blue-800 dark:text-blue-200"
                 )
 
             with ui.row().classes("items-center flex-1 justify-center tracking-tight"):
-                self.screen_changed() 
-           
-
-            
+                self.screen_changed()
 
             with ui.row().classes("items-center gt-sm tracking-tight"):
                 WidgetsLayout.render_menu_master_as_buttons()
@@ -89,8 +80,7 @@ class MasterLayout:
 
         with self.drawer:
             ui.label("Menu di navigazione")
-    
-    
+
     @ui.refreshable_method
     def screen_changed(self) -> None:
         ui.icon(
@@ -123,7 +113,7 @@ class MasterLayout:
                 WidgetsLayout.render_menu_for_childrens_as_buttons(childrens, self.drawer.toggle)
 
         self.updated_is_mobile(self.is_mobile)
-      
+
     def updated_is_mobile(self, is_mobile: bool):
         """
         # aggiorna lo stato dello schermo mobile (callback da ScreenState)"""
@@ -138,6 +128,6 @@ class MasterLayout:
         # self.drawer.value = False
         self.drawer.value = False if self.is_mobile else self.has_childrens
         self.hamburger.set_visibility(self.has_childrens)
-        
+
         self.screen_changed.refresh()
         WidgetsLayout.set_mobile(self.is_mobile)

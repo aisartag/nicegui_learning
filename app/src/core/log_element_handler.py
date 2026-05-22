@@ -1,6 +1,8 @@
 import logging
-from nicegui import ui
+
 from core.log_loader import configExtra
+from nicegui import ui
+
 
 class LogElementHandler(logging.Handler):
     """A logging handler that emits messages to a log element."""
@@ -28,5 +30,5 @@ class ClientFilter(logging.Filter):
             return True
         try:
             return ui.context.client.id == self.owner_id
-        except:
+        except Exception:
             return False

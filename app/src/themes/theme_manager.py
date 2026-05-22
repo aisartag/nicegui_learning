@@ -10,7 +10,6 @@ ThemeLiteral = Literal["light", "dark", "auto"]
 
 
 class ThemeManager:
-
     # Mappa delle icone (Material Icons di default in NiceGUI)
     ICONS: Dict[ThemeLiteral, str] = {
         "light": "light_mode",
@@ -19,7 +18,7 @@ class ThemeManager:
     }
 
     # 1. Tipizziamo lo storage come PersistentDict
-    def  __init__(self, storage: Dict[str, Any]) -> None:
+    def __init__(self, storage: Dict[str, Any]) -> None:
         self.dark = ui.dark_mode()
         self.storage = storage
         # setdefault restituisce Any, quindi facciamo un check o un cast se necessario
@@ -43,12 +42,12 @@ class ThemeManager:
         return self.ICONS[self.mode]
 
     def apply(self) -> None:
-      
+
         logger.info(f"Applying theme mode: {self.mode}")
         if self.mode == "light":
             self.dark.disable()
         elif self.mode == "dark":
-           self.dark.enable()
+            self.dark.enable()
         else:
             # .set_value(None) è il modo standard di NiceGUI per 'auto'
             # ui.dark_mode().set_value(None)
@@ -60,8 +59,3 @@ class ThemeManager:
         current_idx = options.index(self.mode)
         next_mode = cast(ThemeLiteral, options[(current_idx + 1) % len(options)])
         self.mode = next_mode
-
-
-
-
-

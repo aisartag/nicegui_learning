@@ -1,0 +1,27 @@
+[project]
+name = "nicegui-learning"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13.13"
+dependencies = [
+    "nicegui>=3.12.1",
+]
+
+[project.optional-dependencies]
+desktop = [
+    "pywebview>=6.2.1",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.14",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "tab"
+docstring-code-format = true

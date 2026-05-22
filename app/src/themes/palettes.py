@@ -16,7 +16,5 @@ def apply_brand_theme():
         negative="#ef4444",  # Red-500
         info="#6366f1",  # Indigo-500
         warning="#f59e0b",  # Amber-500
-        critical="#8b0000"  # Dark Red-500
+        critical="#8b0000",  # Dark Red-500
     )
-
-    

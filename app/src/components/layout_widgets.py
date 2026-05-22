@@ -1,19 +1,14 @@
 from collections.abc import Callable
+from functools import partial
 from typing import Any, List
-from nicegui import ui
 
 from components.select_theme import theme_choice
+from nicegui import ui
 from routing.route_master import MasterRoute
 from themes.theme_manager import ThemeManager
 
 
-from functools import partial
-from typing import Callable, List
-from nicegui import ui
-
-
 class WidgetsLayout:
-
     is_mobile = False
 
     @classmethod
@@ -39,9 +34,7 @@ class WidgetsLayout:
                 btn = (
                     ui.button(route["label"], on_click=handler)
                     .props("no-caps flat")
-                    .classes(
-                        "px-4 py-2 font-bold text-lg text-blue-800 dark:text-blue-200"
-                    )
+                    .classes("px-4 py-2 font-bold text-lg text-blue-800 dark:text-blue-200")
                 )
                 btnList.append(btn)
 
@@ -49,11 +42,12 @@ class WidgetsLayout:
 
     @classmethod
     def render_menu_for_childrens_as_buttons(
-        cls, routes: List[dict[str, str]], callback: Callable[[], Any] ):
+        cls, routes: List[dict[str, str]], callback: Callable[[], Any]
+    ):
         # 1. Definiamo la logica interna (helper)
-        def _handle_click(path: str, cb: Callable[[], Any] ):
+        def _handle_click(path: str, cb: Callable[[], Any]):
             ui.navigate.to(path)
-            if  cls.is_mobile:
+            if cls.is_mobile:
                 cb()
 
         # routes = MasterRoute.get_router_links()
@@ -67,9 +61,7 @@ class WidgetsLayout:
                 btn = (
                     ui.button(route["label"], on_click=handler)
                     .props("no-caps flat")
-                    .classes(
-                        "px-4 py-2 font-bold text-lg text-blue-800 dark:text-blue-200"
-                    )
+                    .classes("px-4 py-2 font-bold text-lg text-blue-800 dark:text-blue-200")
                 )
                 btnList.append(btn)
 
@@ -84,9 +76,13 @@ class WidgetsLayout:
         with ui.dialog().props(
             'position=right backdrop-filter="blur(8px) brightness(40%)"'
         ) as dialog:
-            with ui.card().classes(
-                "absolute-right m-2 mr-1 !h-min-co  w-64 items-start bg-slate-100 text-slate-800 dark:bg-slate-900  dark:text-blue-200"
-            ).style("height: 600px"):
+            with (
+                ui.card()
+                .classes(
+                    "absolute-right m-2 mr-1 !h-min-co  w-64 items-start bg-slate-100 text-slate-800 dark:bg-slate-900  dark:text-blue-200"
+                )
+                .style("height: 600px")
+            ):
                 with ui.row().classes("w-full"):
                     ui.button(icon="close", on_click=dialog.close).props(
                         "round flat ripple"
@@ -103,6 +99,6 @@ class WidgetsLayout:
                     ui.label("Theme:").classes("text-lg")
                     theme_choice(theme_manager, dialog)
 
-        ui.button(icon="more_vert", on_click=dialog.open).props(
-            "round flat ripple"
-        ).classes("lt-md text-blue-800 dark:text-blue-200")
+        ui.button(icon="more_vert", on_click=dialog.open).props("round flat ripple").classes(
+            "lt-md text-blue-800 dark:text-blue-200"
+        )

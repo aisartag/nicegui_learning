@@ -3,10 +3,9 @@ from typing import Callable
 from nicegui import ui, events
 
 
-
 class ScreenState:
-    def __init__(self, callback:Callable[[bool], None]):
-        
+    def __init__(self, callback: Callable[[bool], None]):
+
         self.callback = callback
 
         ui.add_head_html("""
@@ -31,13 +30,8 @@ class ScreenState:
                
           </script>
         """)
-       
+
         ui.on("breakpoint_change", lambda e: self.handle_breakpoint_change(e))
 
-    
-    def handle_breakpoint_change(self, e:events.GenericEventArguments) -> None:
-        self.callback(e.args['is_mobile'])
-    
-
-
-        
+    def handle_breakpoint_change(self, e: events.GenericEventArguments) -> None:
+        self.callback(e.args["is_mobile"])

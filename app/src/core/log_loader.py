@@ -3,7 +3,7 @@ from typing import TypedDict, List, Dict, Optional
 
 
 class ConfigExtra(TypedDict):
-    root_name:str
+    root_name: str
     filter_by_client: bool
     max_ui_lines: int
 
@@ -41,9 +41,11 @@ class LoggingConfigDict(TypedDict):
     loggers: Dict[str, LoggerConfig]
 
 
-configExtra: ConfigExtra = {"root_name": "sight", "filter_by_client": True, "max_ui_lines": 100}
-
-
+configExtra: ConfigExtra = {
+    "root_name": "sight",
+    "filter_by_client": True,
+    "max_ui_lines": 100,
+}
 
 
 # Esempio di utilizzo nel setup
@@ -62,7 +64,7 @@ def setup_logging() -> None | str:
                 config: LoggingConfigDict = yaml.safe_load(f)
                 log_full_path = str(ProjectPaths.LOGS / "app.log")
                 config["handlers"]["file"]["filename"] = log_full_path
-          
+
                 configExtra.update(config.get("config_extra", {}))
                 # Se devi rinominare 'class_' in 'class' per dictConfig (che lo richiede così)
                 # puoi farlo qui se necessario, o usare '()' nel YAML che è un alias sicuro.
@@ -74,6 +76,4 @@ def setup_logging() -> None | str:
                 return f"Errore nella configurazione del logging: {e}"
     else:
         # Fallback se il file manca
-        return f"{config_path} non trovato!" 
-
-
+        return f"{config_path} non trovato!"

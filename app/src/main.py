@@ -42,10 +42,7 @@ async def root():
 
     logger.info(f"Inizio esecuzione root.{configExtra['filter_by_client']}")
 
-    
     MasterLayout()
-    
-    
 
     # area log
     # with ui.expansion(value=True).classes("w-full h-full"):

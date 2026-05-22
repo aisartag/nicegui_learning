@@ -9,11 +9,15 @@ from core.log_loader import configExtra
 
 logger = logging.getLogger(f"{configExtra['root_name']}.{__name__}")
 
+
 def get_header_popup(theme_manager: ThemeManager) -> None:
-  
+
     logger.info(f"get_header_popup avviata:{ui.context.client.id}")
-    with ui.dialog().props('position=right backdrop-filter="blur(8px) brightness(40%)"') as dialog:
+    with ui.dialog().props(
+        'position=right backdrop-filter="blur(8px) brightness(40%)"'
+    ) as dialog:
         logger.info(f"dialog opened:{ui.context.client.id}")
+
         def handle_click(path: str):
             ui.navigate.to(path)
             dialog.close()
@@ -46,11 +50,6 @@ def get_header_popup(theme_manager: ThemeManager) -> None:
                 ui.label("Color mode:")
                 theme_choice(theme_manager)
 
-
     ui.button(icon="more_vert", on_click=dialog.open).props(
         "round flat ripple"
     ).classes("md:hidden text-blue-800 dark:text-blue-200")
-
-   
-
-   
