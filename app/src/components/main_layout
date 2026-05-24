@@ -1,0 +1,54 @@
+from auth.views.login_view import LoginView
+from nicegui import app, ui
+from views.register_view import RegisterView
+
+
+def main_layout():
+	# 1. Definiamo gli elementi fissi del Master Layout
+	# Salviamo i riferimenti in variabili per poterli manipolare (mostrare/nascondere)
+	with ui.header().classes('bg-primary text-white p-4 justify-between items-center') as header:
+		ui.label('La mia App SPA').classes('text-xl font-bold')
+		with ui.row() as nav_links:
+			ui.link('Home', '/').classes('text-white mr-4')
+			ui.link('Profilo', '/profile').classes('text-white')
+
+	# Un'eventuale sidebar laterale che vogliamo solo in certe pagine
+	with ui.left_drawer().classes('bg-slate-100 p-4') as sidebar:
+		ui.label('Menu di Navigazione')
+
+	# 2. Il contenitore dinamico della SPA
+	sub_container = ui.sub_pages(
+		{
+			'/login': LoginView,
+			'/register': RegisterView,
+			'/': lambda: ui.label('Benvenuto nella Dashboard Privata!'),
+			'/profile': lambda: ui.label('La tua pagina profilo'),
+		}
+	)
+
+	# 3. La funzione di controllo (Regista del Layout)
+	def handle_route_change(event):
+		target_route = event.route  # Es: '/login', '/profile', '/'
+		is_logged = app.storage.user.get('authenticated', False)
+
+		# --- FASE 1: Protezione delle Rotte (Sicurezza) ---
+		# Se la pagina è privata e l'utente NON è loggato, lo dirottiamo al login
+		rotte_pubbliche = ['/login', '/register']
+		if target_route not in rotte_pubbliche and not is_logged:
+			ui.notify('Accesso negato. Effettua il login.', type='warning')
+			ui.navigate.to('/login')
+			return
+
+		# --- FASE 2: Manipolazione Dinamica del Layout (Grafica) ---
+		# Se siamo nella pagina di login o registrazione, nascondiamo i menu strutturali
+		if target_route in ['/login', '/register']:
+			header.set_visibility(False)  # Nasconde la barra in alto
+			sidebar.set_visibility(False)  # Nasconde la sidebar
+		else:
+			# Altrimenti, mostriamo l'interfaccia completa dell'app
+			header.set_visibility(True)
+			sidebar.set_visibility(True)
+
+	# 4. Colleghiamo la funzione all'evento del router di sub_pages
+	# ATTENZIONE: Passiamo il riferimento senza parentesi tonde!
+	sub_container.on_change(handle_route_change)
