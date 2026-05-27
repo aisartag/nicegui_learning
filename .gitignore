@@ -9,5 +9,6 @@ UV.md
 *.log
 .nicegui/
 .env
+notes/**/*
 
 

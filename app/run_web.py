@@ -39,6 +39,8 @@ root_logger = logging.getLogger(configExtra['root_name'])
 root_logger.setLevel(logging.INFO)
 root_logger.info('Inizio esecuzione')
 
+app.add_static_files('/static', str(Path(__file__).parent / 'static'))
+
 
 if __name__ in {'__main__', '__mp_main__'}:
 	ui.run(  # type: ignore

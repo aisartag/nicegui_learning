@@ -1,4 +1,6 @@
 # services/auth_service.py
+
+
 from nicegui import app
 from repositories.user_repository import UserRepository
 from services.crypto_service import CryptoService
@@ -32,16 +34,3 @@ class AuthService:
 		app.storage.user['username'] = user.username
 
 		return True
-
-	def logout(self) -> None:
-		"""
-		Sconnette l'utente cancellando la sessione dallo storage di NiceGUI.
-		Questo metodo può essere sincrono perché agisce solo sullo storage locale.
-		"""
-		# Cancelliamo le chiavi di autenticazione
-		app.storage.user.pop('authenticated', None)
-		app.storage.user.pop('user_id', None)
-		app.storage.user.pop('username', None)
-
-		# In alternativa, per svuotare completamente tutto lo storage dell'utente:
-		# app.storage.user.clear()

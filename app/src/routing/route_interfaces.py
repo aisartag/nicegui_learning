@@ -5,6 +5,9 @@ PATHS_ROOT = Literal['/', '/dashboard', '/settings', '/login', '/register']
 PATHS_CHILDRENS = Literal['/', '/report', '/statistics', '/security', '/profile']
 
 
+GUARD_LEVEL = Literal['protected', 'public', 'sign']
+
+
 class TypedRouteChildrenValue(TypedDict):
 	path: PATHS_CHILDRENS
 	label: str
@@ -17,6 +20,7 @@ class TypedRouteAttr(TypedDict):
 	icon: str
 	component: Callable[[], None]
 	childrens: List[TypedRouteChildrenValue]
+	guard: GUARD_LEVEL
 
 
 TypedRoutes = Dict[PATHS_ROOT, TypedRouteAttr]

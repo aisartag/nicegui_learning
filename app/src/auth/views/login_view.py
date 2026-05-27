@@ -2,6 +2,9 @@ import logging
 
 from auth.schemas.login_schema import LoginSchema, get_clean_errors
 from auth.services.auth_service import AuthService
+
+# events import
+from components.layout_events import loggedin_completed
 from core.log_loader import configExtra
 from database.engine import AsyncSessionLocal
 from nicegui import ui
@@ -15,16 +18,28 @@ logger = logging.getLogger(f'{configExtra["root_name"]}.{__name__}')
 def LoginView():
 	logger.info(f'{NAME} avviata:{ui.context.client.id}')
 
-	with ui.card().classes('mx-auto border-1 border-yellow-600').style('max-width:480px; min-width:384px;'):
+	with (
+		ui.card()
+		.classes('mx-auto bg-slate-100 text-slate-800 dark:bg-slate-900  dark:text-blue-200')
+		.style('max-width:480px; min-width:384px;')
+	):
 		with ui.card_section().classes('w-full'):
-			with ui.row().classes('justify-center items-center border-3 border-blue-600 p-4'):
-				ui.label(NAME)
+			with ui.row().classes('justify-center items-center text-2xl p-4'):
+				with ui.column().classes('my-2 items-center'):
+					ui.image('/static/images/e=mc2-1.png').classes('w-16 h-16')
+					ui.label('Entra nel tuo account')
 
-			with ui.column().classes('my-8'):  # .classes('justify-center items-center border-3 border-blue-600 p-4'):
-				email_input = ui.input('Email').props('icon="mail" clearable').classes('w-full')
-				password_input = ui.input('Password', password=True).props('icon="lock" clearable').classes('w-full')
+			with ui.column().classes('my-4'):  # .classes('justify-center items-center border-3 border-blue-600 p-4'):
+				email_input = (
+					ui.input('Email').props('outlined dense').classes('w-full')
+				)  # props('icon="mail" clearable').classes('w-full')
+				password_input = (
+					ui.input('Password', password=True, password_toggle_button=True)
+					.props('outlined dense')
+					.classes('w-full')
+				)  # .props('icon="lock" clearable').classes('w-full')
 
-			with ui.row().classes('justify-center items-center border-3 border-blue-600 p-4'):
+			with ui.row().classes('justify-start items-center  p-4'):
 				ui.label('Non hai un account?')
 				ui.link('Registrati', '/register').classes('no-underline text-blue-800 dark:text-blue-200')
 
@@ -55,6 +70,10 @@ def LoginView():
 						return
 					else:
 						ui.notify('Login completato!', type='positive')
+						loggedin_completed.emit()
+						# Rinfreschiamo tutta la UI dell'header reattiva
+						# WidgetsLayout.render_menu_master_as_buttons.refresh()
+						# WidgetsLayout.render_user_zone.refresh()
 
 				except ValidationError as e:
 					# ui.notify(f'Error: {e}', type='negative')
@@ -76,4 +95,6 @@ def LoginView():
 					logger.error(e)
 
 		with ui.card_actions().classes('w-full'):
-			ui.button('Submit', on_click=on_submit).classes('w-full')
+			ui.button('Login', on_click=on_submit).props('no-caps').classes(
+				'w-full text-white bg-indigo-600! dark:bg-indigo-500!'
+			)

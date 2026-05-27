@@ -1,12 +1,13 @@
 import logging
 
+# subscribed events
+from components.layout_events import loggedin_completed
 from components.layout_widgets import WidgetsLayout
 from core.log_loader import configExtra
 from nicegui import Client, app, ui
-from routing.route_events import childrens_emitted
 from routing.route_master import MasterRoute
 from themes.theme_manager import ThemeManager
-from utils.screen_state_old import ScreenState
+from utils.screen_state import ScreenState
 
 logger = logging.getLogger(f'{configExtra["root_name"]}.{__name__}')
 
@@ -30,15 +31,22 @@ class MasterLayout:
 		)
 		self.header: ui.header = ui.header(elevated=True)
 
-		self.theme_manager = ThemeManager(app.storage.user)
+		self.widgets = WidgetsLayout()
 
 		self.setup_ui()
 
-		# ascolta i cambiamenti di childrens (dal routing)
-		childrens_emitted.subscribe(self.handle_new_childrens)
+		self.router = MasterRoute(
+			on_sign_layout=self.handle_layout_header_toggle, on_childrens_changed=self.handle_new_childrens
+		)
 
-		# not ui elements rendered here
-		self.setup_routing()
+		# Avviamo il routing passando il path iniziale
+		self.router.start(self.current_path)
+
+		# subscribe events di loggedin per aggiornare il layout
+		loggedin_completed.subscribe(self.refresh_widgets)
+
+	def handle_layout_header_toggle(self, is_visible: bool):
+		self.header.visible = is_visible
 
 	def setup_ui(self):
 		"""renderizza il layout  header e drawer"""
@@ -63,40 +71,41 @@ class MasterLayout:
 				self.screen_changed()
 
 			with ui.row().classes('items-center gt-sm tracking-tight'):
-				WidgetsLayout.render_menu_master_as_buttons()
+				self.widgets.render_menu_master_as_buttons()
 
 				# toggle dark mode
-				ui.button(on_click=self.theme_manager.cycle).bind_icon_from(
-					self.theme_manager, 'icon'
-				).props('round ripple flat').classes('text-blue-800 dark:text-blue-200')
+				ui.button(on_click=self.theme_manager.cycle).bind_icon_from(self.theme_manager, 'icon').props(
+					'round ripple flat'
+				).classes('text-blue-800 dark:text-blue-200')
 
-			WidgetsLayout.render_menu_as_dropdown(self.theme_manager)
+				self.widgets.render_user_zone()
+
+			self.widgets.render_menu_as_dropdown(
+				self.theme_manager
+			)  # WidgetsLayout.render_menu_as_dropdown(self.theme_manager)
 
 		with ui.column().classes(
 			'w-full min-h-[calc(100vh-384px)] border-2 border-blue-600  bg-slate-100 dark:bg-slate-800'
 		):
 			ui.label('Main Content Area').classes('m-2 font-bold text-xl')
-			ui.sub_pages(MasterRoute.as_nicegui_dict()).classes(
-				'w-full'
-			)  #  border-4 border-red-600
+			ui.sub_pages(MasterRoute.as_nicegui_dict()).classes('w-full')  #  border-4 border-red-600
 
 		with self.drawer:
 			ui.label('Menu di navigazione')
 
+	def refresh_widgets(self):
+		logger.info(f'refresh_widgets: {self.client.id}')
+		self.widgets.render_menu_master_as_buttons.refresh()
+		self.widgets.render_user_zone.refresh()
+
 	@ui.refreshable_method
 	def screen_changed(self) -> None:
+		"""
+		aggiorna lo stato dello schermo mobile (callback da ScreenState)"""
 		ui.icon(
 			name=('s_mobile_friendly' if self.is_mobile else 's_desktop_windows'),
 			color='primary',
 		).classes('text-2xl')
-
-	def setup_routing(self):
-		"""
-		setup routing e subscribe al emitter childrens_emitted"""
-
-		# attiva listener per i cambiamenti di path e aggiorna la route
-		logger.info(f'MasterRoute.setup call current_path: {self.current_path}')
-		MasterRoute.setup(self.current_path)
 
 	def handle_new_childrens(self, childrens: list[dict[str, str]] | None):
 		"""
@@ -112,13 +121,14 @@ class MasterLayout:
 
 		if self.has_childrens:
 			with self.drawer:
-				WidgetsLayout.render_menu_for_childrens_as_buttons(childrens, self.drawer.toggle)
+				self.widgets.render_menu_for_childrens_as_buttons(childrens, self.drawer.toggle)
 
+		# aggiorna lo stato dello schermo mobile/desktop
 		self.updated_is_mobile(self.is_mobile)
 
 	def updated_is_mobile(self, is_mobile: bool):
 		"""
-		# aggiorna lo stato dello schermo mobile (callback da ScreenState)"""
+		# aggiorna lo stato dello schermo mobile (***callback da ScreenState***)"""
 		self.is_mobile = is_mobile
 		# logger.info(f"updated_is_mobile: {self.is_mobile}-{self.client.id}")
 
@@ -132,4 +142,6 @@ class MasterLayout:
 		self.hamburger.set_visibility(self.has_childrens)
 
 		self.screen_changed.refresh()
-		WidgetsLayout.set_mobile(self.is_mobile)
+
+		# aggiorna lo stato dello schermo mobile nei widgets
+		self.widgets.set_mobile(self.is_mobile)

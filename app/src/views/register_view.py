@@ -15,31 +15,41 @@ logger = logging.getLogger(f'{configExtra["root_name"]}.{__name__}')
 def RegisterView():
 	logger.info(f'{NAME} avviata:{ui.context.client.id}')
 
-	# with ui.column().classes('w-full  border-3 border-bg-yellow-600'):
-	# with ui.row().classes('w-full mx-auto border-2 border-red-600'):
-	with ui.card().classes('mx-auto border-1 border-yellow-600').style('max-width:480px; min-width:384px;'):
+	with (
+		ui.card()
+		.classes('mx-auto bg-slate-100 text-slate-800 dark:bg-slate-900  dark:text-blue-200')
+		.style('max-width:480px; min-width:384px;')
+	):
 		with ui.card_section().classes('w-full'):
-			with ui.row().classes('justify-center items-center border-3 border-blue-600 p-4'):
-				ui.label(NAME)
+			with ui.row().classes('justify-center items-center text-2xl p-4'):
+				with ui.column().classes('my-2 items-center'):
+					ui.image('/static/images/e=mc2-1.png').classes('w-16 h-16')
+					ui.label('Registrazione account')
 
-			with ui.column().classes('my-8'):  # .classes('justify-center items-center border-3 border-blue-600 p-4'):
-				username_input = ui.input('Username', value='').props('clearable').classes('w-full')
-				with username_input.add_slot('append'):
-					ui.icon('person').props('color=primary')
+			with ui.column().classes('my-4'):  # .classes('justify-center items-center border-3 border-blue-600 p-4'):
+				username_input = ui.input('Username').props('outlined dense').classes('w-full')  # props('clearable')
+				# with username_input.add_slot('append'):
+				# 	ui.icon('person').props('color=primary')
 
-				email_input = ui.input('Email').props('clearable').classes('w-full')
-				with email_input.add_slot('append'):
-					ui.icon('mail').props('color=primary')
+				email_input = (
+					ui.input('Email').props('outlined dense').classes('w-full')
+				)  # props('clearable').classes('w-full')
+				# with email_input.add_slot('append'):
+				# 	ui.icon('mail').props('color=primary')
 
-				password_input = ui.input('Password', password=True).props('clearable').classes('w-full')
-				with password_input.add_slot('append'):
-					ui.icon('lock').props('color=primary')
+				password_input = (
+					ui.input('Password', password=True, password_toggle_button=True)
+					.props('outlined dense')
+					.classes('w-full')
+				)  # props('clearable').classes('w-full')
+				# with password_input.add_slot('append'):
+				# 	ui.icon('lock').props('color=primary')
 
 				confirm_password_input = (
-					ui.input('Confirm Password', password=True).props('clearable').classes('w-full')
+					ui.input('Confirm Password', password=True, password_toggle_button=True)
+					.props('outlined dense')
+					.classes('w-full')  # props('clearable').classes('w-full')
 				)
-				with confirm_password_input.add_slot('append'):
-					ui.icon('lock').props('color=primary')
 
 			all_inputs = {
 				'username': username_input,
@@ -101,4 +111,6 @@ def RegisterView():
 					logger.error(e)
 
 		with ui.card_actions().classes('w-full'):
-			ui.button('Submit', on_click=on_submit).classes('w-full')
+			ui.button('Registrati', on_click=on_submit).props('no-caps').classes(
+				'w-full text-white bg-indigo-600! dark:bg-indigo-500!'
+			)

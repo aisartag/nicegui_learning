@@ -1,0 +1,59 @@
+services:
+  ui:
+      build: .
+      container_name: nicegui_learning
+      ports:
+        - "8080:8080"
+      restart: unless-stopped
+      volumes:
+        - ./app:/nicegui_learning/app
+      environment:
+        - WATCHFILES_FORCE_POLLING=true
+        - DB_URL=postgresql+asyncpg://user:aisar@db:5432/nicegui_learning_db
+      depends_on:
+        db:
+          condition: service_healthy # Attende che Postgres sia realmente pronto
+      networks:
+      - nicegui-learning-net
+      - traefik-proxy
+
+      labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ui.rule=Host(`nicegui-learning.local`)" # Nuovo dominio
+      - "traefik.http.services.ui.loadbalancer.server.port=8080" # Resta 8080 se l'app internamente usa quell
+
+  
+  db:
+    container_name: nicegui_learning_db_container
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: nicegui_learning_db
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+        # Montiamo il volume sulla cartella radice di Postgres nel container
+      - postgres-data:/var/lib/postgresql
+    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d nicegui_learning_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    
+    networks:
+      - nicegui-learning-net
+    
+
+volumes:
+  postgres-data:
+
+networks:
+  nicegui-learning-net:
+    external: true
+  traefik-proxy:
+    external: true
+      

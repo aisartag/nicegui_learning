@@ -17,6 +17,17 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "Docker Compose: Avvia Ambiente",
+            "type": "shell",
+            "command": "docker compose --env-file .env.docker up -d --build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [],
+            "detail": "Avvia i container in background con build automatico e file di configurazione multipli."
         }
     ]
 }
