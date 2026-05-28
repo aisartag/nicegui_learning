@@ -3,6 +3,7 @@ from collections.abc import Callable
 from types import MappingProxyType
 from typing import cast, get_args
 
+from auth.services.login_state import is_loggedin
 from auth.views.login_view import LoginView
 from core.log_loader import configExtra
 from nicegui import ui
@@ -80,9 +81,23 @@ class MasterRoute:
 		# Usiamo il dizionario in modo diretto e type-safe senza cast artificiali
 		route: TypedRouteAttr = self.ROUTES[cast(PATHS_ROOT, path)]
 
-		# Gestione Visibilità Header (Senza eventi globali!)
-		is_sign_page = route.get('guard') == 'sign'
-		self.on_sign_layout(not is_sign_page)  # True se visibile, False se sign page
+		guard = route.get('guard')
+		is_logged = is_loggedin()
+
+		# Inibisce se loggedin di navigare su pagine con guard='sign'
+		if guard == 'sign' and is_logged:
+			ui.navigate.to('/')  # home
+			return
+
+		# per nscondere la barra di navigazione per rotte 'sign
+		self.on_sign_layout(not guard == 'sign')
+
+		if guard == 'protected' and not is_logged:
+			logger.info(f'Accesso negato. Salvo il redirect per: {path}')
+			# Passiamo il path originale (completo di eventuali sotto-pagine) nell'URL
+			self.on_sign_layout(False)
+			ui.navigate.to(f'/login?redirect_to={path}')
+			return
 
 		# Gestione Sotto-Menu (Invio diretto alla callback del layout)
 		childrens = self.get_childrens_links(cast(PATHS_ROOT, path))

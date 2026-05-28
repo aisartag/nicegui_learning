@@ -4,6 +4,7 @@ from core.log_loader import configExtra
 from database.engine import AsyncSessionLocal
 from nicegui import ui
 from pydantic import ValidationError
+from routing.route_interfaces import SIGNIN
 from schemas.register_schema import RegisterSchema, get_clean_errors
 from services.user_service import UserService
 
@@ -79,7 +80,7 @@ def RegisterView():
 							await user_service.register_user_with_profile(data.username, data.email, data.password)
 
 						ui.notify('Registration completed!', type='positive')
-						ui.navigate.to('/login')
+						ui.navigate.to(SIGNIN)
 
 					except Exception as e:
 						ui.notify(f'Error: {e}', type='negative')

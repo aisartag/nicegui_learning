@@ -78,11 +78,12 @@ class MasterLayout:
 					'round ripple flat'
 				).classes('text-blue-800 dark:text-blue-200')
 
-				self.widgets.render_user_zone()
+			# WidgetsLayout.render_menu_as_dialog(self.theme_manager)
+			with ui.row().classes('items-center tracking-tight lt-md'):
+				self.widgets.render_menu_as_dialog(self.theme_manager)
 
-			self.widgets.render_menu_as_dropdown(
-				self.theme_manager
-			)  # WidgetsLayout.render_menu_as_dropdown(self.theme_manager)
+			with ui.row().classes('items-center tracking-tight'):
+				self.widgets.render_user_zone()
 
 		with ui.column().classes(
 			'w-full min-h-[calc(100vh-384px)] border-2 border-blue-600  bg-slate-100 dark:bg-slate-800'
@@ -94,6 +95,8 @@ class MasterLayout:
 			ui.label('Menu di navigazione')
 
 	def refresh_widgets(self):
+		"""
+		aggiorna lo stato dei widgets"""
 		logger.info(f'refresh_widgets: {self.client.id}')
 		self.widgets.render_menu_master_as_buttons.refresh()
 		self.widgets.render_user_zone.refresh()

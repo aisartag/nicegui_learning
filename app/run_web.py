@@ -1,7 +1,9 @@
 # ruff: noqa: E402
 import logging
 import sys
+from collections.abc import Callable
 from pathlib import Path
+from typing import Any, Protocol, cast
 
 from nicegui import app, ui
 
@@ -42,8 +44,24 @@ root_logger.info('Inizio esecuzione')
 app.add_static_files('/static', str(Path(__file__).parent / 'static'))
 
 
+class NiceGuiRunCallable(Protocol):
+	def __call__(
+		self: Callable[..., Any],
+		*,
+		native: bool = ...,
+		title: str = ...,
+		reload: bool = ...,
+		port: int = ...,
+		host: str = ...,
+		storage_secret: str = ...,
+	) -> None: ...
+
+
+run_app = cast(NiceGuiRunCallable, ui.run)  # type: ignore[reportUnknownMemberType]
+
+
 if __name__ in {'__main__', '__mp_main__'}:
-	ui.run(  # type: ignore
+	run_app(  # type: ignore
 		root,
 		title='Nicegui learning',
 		host='0.0.0.0',

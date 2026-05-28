@@ -7,20 +7,22 @@ from auth.services.auth_service import AuthService
 from components.layout_events import loggedin_completed
 from core.log_loader import configExtra
 from database.engine import AsyncSessionLocal
-from nicegui import ui
+from nicegui import PageArguments, ui
 from pydantic import ValidationError
+from routing.route_interfaces import PROTECTED_ROUTE_DEFAULT, SIGNUP
 
 NAME = 'Login'
 
 logger = logging.getLogger(f'{configExtra["root_name"]}.{__name__}')
 
 
-def LoginView():
+def LoginView(args: PageArguments):
 	logger.info(f'{NAME} avviata:{ui.context.client.id}')
 
 	with (
 		ui.card()
-		.classes('mx-auto bg-slate-100 text-slate-800 dark:bg-slate-900  dark:text-blue-200')
+		.props('bordered')
+		.classes('mx-auto bg-slate-200 text-slate-800 dark:bg-slate-900  dark:text-blue-200')
 		.style('max-width:480px; min-width:384px;')
 	):
 		with ui.card_section().classes('w-full'):
@@ -39,9 +41,9 @@ def LoginView():
 					.classes('w-full')
 				)  # .props('icon="lock" clearable').classes('w-full')
 
-			with ui.row().classes('justify-start items-center  p-4'):
+			with ui.row().classes('justify-start items-center  p-2'):
 				ui.label('Non hai un account?')
-				ui.link('Registrati', '/register').classes('no-underline text-blue-800 dark:text-blue-200')
+				ui.link('Registrati', SIGNUP).classes('no-underline text-blue-800 dark:text-blue-200')
 
 			all_inputs = {
 				'email': email_input,
@@ -69,11 +71,10 @@ def LoginView():
 						ui.notify('Login fallito', type='negative')
 						return
 					else:
-						ui.notify('Login completato!', type='positive')
+						ui.notify('Login completato con successo!', type='positive')
 						loggedin_completed.emit()
-						# Rinfreschiamo tutta la UI dell'header reattiva
-						# WidgetsLayout.render_menu_master_as_buttons.refresh()
-						# WidgetsLayout.render_user_zone.refresh()
+
+						ui.navigate.to(args.query_parameters.get('redirect_to', PROTECTED_ROUTE_DEFAULT))
 
 				except ValidationError as e:
 					# ui.notify(f'Error: {e}', type='negative')
@@ -94,7 +95,10 @@ def LoginView():
 					ui.notify(f'Error: {e}', type='negative')
 					logger.error(e)
 
-		with ui.card_actions().classes('w-full'):
+		with ui.card_actions().classes('w-full gap-y-10'):
 			ui.button('Login', on_click=on_submit).props('no-caps').classes(
 				'w-full text-white bg-indigo-600! dark:bg-indigo-500!'
+			)
+			ui.link('Vai alla Home page', '/').classes(
+				'no-underline text-sm text-blue-800 dark:text-blue-200 w-full text-right pr-1'
 			)
