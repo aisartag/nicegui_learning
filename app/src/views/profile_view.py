@@ -6,6 +6,7 @@ from core.log_loader import configExtra
 from database.engine import AsyncSessionLocal
 from exceptions import UnAuthenticatedException
 from nicegui import events, ui
+from routing.route_interfaces import PROTECTED_ROUTE_DEFAULT
 from services.user_service import UserService
 from state.user_state import ProfileState, UserStorage
 
@@ -32,6 +33,24 @@ class UserProfileView:
 			),
 		).props('accept=".png, .jpg, .jpeg, .webp"')
 		self.upload_avatar.classes('w-full')
+
+	def bio_render(self):
+		self.bio_textarea = (
+			ui.textarea(
+				label='Biografia / Presentazione',
+				value=self.profile_state.bio,
+				placeholder='Racconta qualcosa di te...',
+			)
+			.props('outlined clearable rows=10')
+			.classes('w-full')
+		)
+
+		with ui.row().classes('w-full justify-between'):
+			ui.button('Esci', on_click=self.navigate_to_dashboard).classes('w-1/4 btn-custom')
+			ui.button('Salva', on_click=self.save_bio).classes('w-1/4 btn-custom')
+
+	def navigate_to_dashboard(self):
+		ui.navigate.to(PROTECTED_ROUTE_DEFAULT)
 
 	async def save_avatar(self, e: events.UploadEventArguments):
 		"""
@@ -77,6 +96,30 @@ class UserProfileView:
 			ui.notify(f'Error: {ex}', type='negative')
 			logger.error(ex)
 			return
+		except Exception as ex:
+			ui.notify(f'Error: {ex}', type='negative')
+			logger.error(ex)
+			return
+
+	async def save_bio(self):
+		try:
+			async with AsyncSessionLocal() as session:
+				user_service = UserService(session)
+				user_id = AuthState.get_authenticated_user_id()
+				if user_id is None:
+					raise ValueError('Utente non autenticato')
+
+				# aggiorna avatar_url su database
+				new_profile = await user_service.save_bio(user_id, self.bio_textarea.value)
+				new_bio = new_profile.bio
+				logger.info(f'new_bio: {new_bio}')
+
+				# aggiorna storage user
+				UserStorage.update_user_profile_bio(new_bio)
+
+				# comunica ai sottoscrittori l'evento *** non necessario **
+				# user_state_modified.emit()
+
 		except Exception as ex:
 			ui.notify(f'Error: {ex}', type='negative')
 			logger.error(ex)
@@ -131,7 +174,5 @@ async def ProfileView():
 				current_bio = UserStorage.get_current_bio()
 				logger.info(f'Bio info:{current_bio}')
 
-				# bio_textarea = (
-				ui.textarea(
-					label='Biografia / Presentazione', value=current_bio, placeholder='Racconta qualcosa di te...'
-				).props('outlined clearable rows=10').classes('w-full')
+				# bio_textarea =
+				user_profile_view.bio_render()

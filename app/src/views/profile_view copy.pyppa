@@ -127,3 +127,6 @@ async def ProfileView():
 				ui.textarea(
 					label='Biografia / Presentazione', value=current_bio, placeholder='Racconta qualcosa di te...'
 				).props('outlined clearable rows=10').classes('w-full')
+
+				with row().classes('w-full justify-end'):
+					ui.button('Salva').classes('w-1/2')   # , on_click=user_profile_view.save_bio

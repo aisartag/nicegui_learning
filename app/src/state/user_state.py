@@ -113,7 +113,7 @@ class UserStorage:
 		app.storage.client['user_state'] = updated_user
 
 	@classmethod
-	def update_user_profile_bio(cls, bio: str):
+	def update_user_profile_bio(cls, bio: str | None):
 
 		current_user = cls.get_user_state()
 		if current_user is None or current_user.profile is None:

@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 
 class ProfileSchema(BaseModel):
-	bio: Union[str, None] | str = Field(max_length=20)
+	bio: Union[str, None] | str = Field(max_length=300)
 
 
 ERROR_MESSAGES = {
