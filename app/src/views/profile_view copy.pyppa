@@ -7,42 +7,26 @@ from database.engine import AsyncSessionLocal
 from exceptions import UnAuthenticatedException
 from nicegui import events, ui
 from services.user_service import UserService
-from state.user_state import ProfileState, UserStorage
+from state.user_state import UserStorage
 
 
 class UserProfileView:
-	def __init__(self, profile_state: ProfileState):
-		self.profile_state = profile_state
+	def __init__(self, current_avatar):
+		self.display_avatar = ui.image(current_avatar).classes('w-36 h-36 rounded-full object-cover border-2 border-primary shadow-inner')
+		self.upload_avatar = ui.upload(label='Cambia foto',
+						max_files=1,
+						auto_upload=False,
+						on_upload=self.on_avatar_upload(e),
+						on_rejected=lambda: ui.notify('Tipo file non consentito.Estensioni consentite: .png, .jpg, .jpeg, .webp', type='negative')
+						).props('accept=".png, .jpg, .jpeg, .webp"')
 
-	def image_avatar_render(self):
-		self.display_avatar = ui.image(self.profile_state.avatar_url).classes(
-			'w-36 h-36 rounded-full object-cover border-2 border-primary shadow-inner'
-		)
-		self.display_avatar.classes('w-36 h-36 rounded-full object-cover border-2 border-primary shadow-inner')
-		self.display_avatar.force_reload()
+	def get_disply_avatar(self):
+		return self.display_avatar
 
-	def upload_avatar_render(self):
-		self.upload_avatar = ui.upload(
-			label='Cambia foto',
-			max_files=1,
-			auto_upload=False,
-			on_upload=self.save_avatar,
-			on_rejected=lambda: ui.notify(
-				'Tipo file non consentito.Estensioni consentite: .png, .jpg, .jpeg, .webp', type='negative'
-			),
-		).props('accept=".png, .jpg, .jpeg, .webp"')
-		self.upload_avatar.classes('w-full')
+	def get_upload_avatar(self):
+		return self.upload_avatar
 
-	async def save_avatar(self, e: events.UploadEventArguments):
-		"""
-		Aggiorna la foto di profilo
-
-		Args:
-			e (events.UploadEventArguments): _description_
-
-		Returns:
-			_type_: _description_
-		"""
+	async def on_avatar_upload(self, e: events.UploadEventArguments):
 
 		try:
 			file_name = e.file.name
@@ -95,23 +79,11 @@ async def ProfileView():
 	try:
 		user_state = UserStorage.get_user_state()
 		logger.info(f'user_state: {user_state}')
-
-		# controllo autenticazione: user_state può essere None UnAuthenticatedException
-		if user_state is None:
-			raise UnAuthenticatedException
-
-		# controllo profile_state : profile_state non puo essere None e scatene
-		profile_state = user_state.profile
-		logger.info(f'profile_state: {profile_state}')
-
 	except UnAuthenticatedException as e:
 		logger.warning(e)
 		ui.notify('Accesso negato. Effettua il login.', type='warning')
 		ui.navigate.to('/login')
 		return
-
-	assert profile_state is not None
-	user_profile_view = UserProfileView(profile_state)
 
 	with ui.card().classes('m-auto w-[60vw] card-custom border-1 border-red-600 '):
 		with ui.row().classes('w-full gap-8 items-start  no-wrap grid grid-cols-1 lg:grid-cols-2 gap-8'):
@@ -121,10 +93,30 @@ async def ProfileView():
 				current_avatar = UserStorage.get_current_avatar_url()
 				logger.info(f'current_avatar:{current_avatar}')
 
-				user_profile_view.image_avatar_render()
-				user_profile_view.upload_avatar_render()
+				user_profile_view= UserProfile(current_avatar=current_avatar)
 
-			ui.separator().classes('lt-md w-full')
+
+				# display avatar image current
+				avatar_display = ui.image(current_avatar).classes(
+					'w-36 h-36 rounded-full object-cover border-2 border-primary shadow-inner'
+				)
+				avatar_display.force_reload()
+
+				user_profile_view = UserProfileView(display_avatar=avatar_display, upload_avatar=upload)
+
+				upload = (
+					ui.upload(
+						label='Cambia foto',
+						max_files=1,
+						auto_upload=False,
+						on_upload=user_profile_view.on_avatar_upload(e),
+						on_rejected=lambda: ui.notify(
+							'Tipo file non consentito.Estensioni consentite: .png, .jpg, .jpeg, .webp', type='negative'
+						),
+					)
+					.props('accept=".png, .jpg, .jpeg, .webp"')
+					.classes('w-full')
+				)
 
 			with ui.column().classes('w-full items-center'):
 				ui.label('Informazioni Personali').classes('text-sm font-semibold text-slate-500')

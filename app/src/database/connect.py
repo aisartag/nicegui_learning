@@ -1,7 +1,6 @@
+import models
 from database.engine import engine
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
-
-import models
 
 
 async def do_connection(reset: bool = False) -> bool:
@@ -10,6 +9,7 @@ async def do_connection(reset: bool = False) -> bool:
 		async with engine.begin() as conn:
 			if reset:
 				await conn.run_sync(models.Base.metadata.drop_all)  # solo in sviluppo
+
 			await conn.run_sync(models.Base.metadata.create_all)
 			return True
 

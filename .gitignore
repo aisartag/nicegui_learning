@@ -9,6 +9,7 @@ UV.md
 *.log
 .nicegui/
 .env
+.env.docker
 notes/**/*
 
 

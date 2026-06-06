@@ -2,6 +2,7 @@ import logging
 
 from core.log_loader import configExtra
 from database.engine import AsyncSessionLocal
+from exceptions import RegistrationException
 from nicegui import ui
 from pydantic import ValidationError
 from routing.route_interfaces import SIGNIN
@@ -24,7 +25,7 @@ def RegisterView():
 		with ui.card_section().classes('w-full'):
 			with ui.row().classes('justify-center items-center text-2xl p-4'):
 				with ui.column().classes('my-2 items-center'):
-					ui.image('/static/images/e=mc2-1.png').classes('w-16 h-16')
+					ui.image('/public/images/e=mc2-1.png').classes('w-16 h-16')
 					ui.label('Registrazione account')
 
 			with ui.column().classes('my-4'):  # .classes('justify-center items-center border-3 border-blue-600 p-4'):
@@ -60,13 +61,15 @@ def RegisterView():
 			}
 
 			async def on_submit():
-
+				# 1. Resetta gli errori grafici precedenti
 				for input_field in all_inputs.values():
 					input_field.props.pop('error', None)
 					input_field.props.pop('error-message', None)
 					input_field.update()
 
+				# 2. Un UNICO blocco try per tutto il processo di sottomissione
 				try:
+					# Validazione Pydantic
 					data = RegisterSchema(
 						username=username_input.value or '',
 						email=email_input.value or '',
@@ -74,44 +77,48 @@ def RegisterView():
 						confirm_password=confirm_password_input.value or '',
 					)
 
-					try:
-						async with AsyncSessionLocal() as session:
-							user_service = UserService(session)
-							await user_service.register_user_with_profile(data.username, data.email, data.password)
+					# Se Pydantic passa, eseguiamo il Database
+					async with AsyncSessionLocal() as session:
+						user_service = UserService(session)
+						await user_service.register_user_with_profile(
+							username=data.username, email=data.email, clear_password=data.password
+						)
 
-						ui.notify('Registration completed!', type='positive')
-						ui.navigate.to(SIGNIN)
+					# Se siamo arrivati qui, tutto è andato a buon fine!
+					ui.notify('Registration completed!', type='positive')
+					ui.navigate.to(SIGNIN)
 
-					except Exception as e:
-						ui.notify(f'Error: {e}', type='negative')
-						logger.error(e)
-
-					# if not result:
-					# 	ui.notify('Login fallito', type='negative')
-					# 	return
-					# else:
-					# 	ui.notify('Login completato!', type='positive')
-
+				# 3. Gestione mirata di OGNI tipo di errore (in ordine dal più specifico al più generico)
 				except ValidationError as e:
-					# ui.notify(f'Error: {e}', type='negative')
-					logger.error(e.json())
-
+					# Errore di validazione Pydantic (Campi vuoti, email non valida, ecc.)
 					friendly_errors = get_clean_errors(e)
-
-					# Correct way to apply dynamic props in NiceGUI:
-					# Assign directly to the .props dict, then trigger .update()
 					for field_name, error_msg in friendly_errors.items():
 						if field_name in all_inputs:
 							all_inputs[field_name].props['error'] = True
 							all_inputs[field_name].props['error-message'] = error_msg
 							all_inputs[field_name].update()
-
 					ui.notify('Please fix the errors in the form.', type='negative')
-				except Exception as e:
-					ui.notify(f'Error: {e}', type='negative')
-					logger.error(e)
 
-		with ui.card_actions().classes('w-full'):
+				except ValueError as e:
+					# Errore di validazione logica lanciato dal Service (es: "Email già in uso")
+					# Nota: se nel Service lanci ValueError per duplicati, lo catturi qui!
+					ui.notify(str(e), type='negative')
+					logger.warning(f'Validazione fallita: {e}')
+
+				except RegistrationException as e:
+					# Errore specifico del Database / Transazione fallita
+					ui.notify(f'Registration Error: {e}', type='negative')
+					logger.error(f'Errore registrazione: {e}')
+
+				except Exception as e:
+					# Qualsiasi altro errore imprevisto (es. crash di rete, errore di sintassi, ecc.)
+					ui.notify('An unexpected error occurred. Please try again.', type='negative')
+					logger.error(f'Errore imprevisto nel submit: {e}', exc_info=True)
+
+		with ui.card_actions().classes('w-full gap-y-8'):
 			ui.button('Registrati', on_click=on_submit).props('no-caps').classes(
 				'w-full text-white bg-indigo-600! dark:bg-indigo-500!'
+			)
+			ui.link('Vai alla Home page', '/').classes(
+				'no-underline text-sm text-blue-800 dark:text-blue-200 w-full text-right pr-1'
 			)

@@ -15,6 +15,7 @@ print(sys.path)
 
 
 # moduli locali
+
 from database.connect import do_connection
 from src.core.boot import bootstrap
 from src.core.log_loader import configExtra
@@ -41,7 +42,23 @@ root_logger = logging.getLogger(configExtra['root_name'])
 root_logger.setLevel(logging.INFO)
 root_logger.info('Inizio esecuzione')
 
-app.add_static_files('/static', str(Path(__file__).parent / 'static'))
+
+# Registrazione cartelle statiche
+# Icone, loghi
+app.add_static_files('/public', str(Path(__file__).parent / 'assets'))
+app.add_static_files(
+	'/uploads', str(Path(__file__).parent.parent / 'data_storage/avatars')
+)  # Avatar dinamici degli utenti
+
+
+# from starlette.middleware.sessions import SessionMiddleware
+
+# # 1. Recuperi la chiave dall'ambiente Docker (o usi un fallback locale)
+# CHIAVE_SEGRETA = os.environ.get('MY_APP_SECRET', 'pizzeche')
+
+# # 2. Configuri il middleware con la chiave e forzi la scadenza alla chiusura della scheda
+# app.add_middleware(SessionMiddleware, secret_key=CHIAVE_SEGRETA, max_age=None)
+# root_logger.info(f'secret_key.{CHIAVE_SEGRETA}')
 
 
 class NiceGuiRunCallable(Protocol):

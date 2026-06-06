@@ -15,11 +15,11 @@ class Profile(Base):
 	__tablename__ = 'profiles'
 
 	id: Mapped[int] = mapped_column(primary_key=True)
-	bio: Mapped[str | None] = mapped_column(String(500))
+	bio: Mapped[str | None] = mapped_column()
 	avatar_url: Mapped[str | None] = mapped_column(String(255))
 
 	# Chiave esterna che collega il profilo all'utente
-	user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'))
+	user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), unique=True)
 
 	# Relazione speculare verso l'utente
 	user: Mapped['User'] = relationship('User', back_populates='profile')

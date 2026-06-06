@@ -1,13 +1,19 @@
+import logging
 from collections.abc import Callable
 from functools import partial
 from typing import Any, List
 
-from auth.services.login_state import get_logged_username, is_loggedin, logout
+from auth.services.auth_state import AuthState
 from components.select_theme import theme_choice
+from components.user_avater import UserAvatar
+from core.log_loader import configExtra
 from nicegui import ui
-from routing.route_interfaces import SIGNIN
+from routing.route_interfaces import MENU_MASTER_EXCLUDE, SIGNIN  # , SIGNIN
 from routing.route_master import MasterRoute
+from state.user_state import UserStorage
 from themes.theme_manager import ThemeManager
+
+logger = logging.getLogger(f'{configExtra["root_name"]}.{__name__}')
 
 
 class WidgetsLayout:
@@ -26,13 +32,13 @@ class WidgetsLayout:
 			if cb:
 				cb()
 
-		is_logged = is_loggedin()
+		is_logged = AuthState.is_authenticated()
 
 		routes = MasterRoute.get_router_links()
 		btnList: List[ui.button] = []
 
 		for route in routes:
-			if route['path'] == '/':
+			if route['path'] in MENU_MASTER_EXCLUDE:
 				continue
 
 			guard = route['guard']
@@ -52,56 +58,12 @@ class WidgetsLayout:
 				btn = (
 					ui.button(route['label'], on_click=handler)
 					.props('no-caps flat')
-					.classes('px-4 py-2 font-bold text-lg text-blue-800 dark:text-blue-200')
+					.classes('px-4 py-2 font-bold text-sm text-blue-800 dark:text-blue-200')
 				)
 				btnList.append(btn)
 
-		return btnList
-
-	# @ui.refreshable_method
-	# def render_user_zone(self) -> None:
-	# 	is_logged = is_loggedin()
-	# 	if is_logged:
-	# 		username = get_logged_username()
-
-	# 		with ui.row().classes('items-center'):
-	# 			ui.label(f'Benvenuto {username}').classes('text-lg')
-	# 			ui.button(icon='logout', on_click=logout).props('flat round ripple')
-
-	# 			with ui.row().classes('items-center gap-3 px-2'):
-	# 				# Un piccolo avatar testuale o icona
-	# 				with ui.avatar(color='primary', text_color='white').props('size=sm'):
-	# 					ui.label(username[0].upper())
-
-	# 				# Nome utente (invisibile su schermi molto piccoli se preferisci)
-	# 				ui.label(username).classes('font-medium text-sm text-slate-700 dark:text-blue-200 gt-xs')
-
-	# 				# Pulsante di Logout minimale con un'icona
-	# 				def _handle_logout():
-	# 					logout()
-	# 					ui.notify('Sessione chiusa con successo', type='info')
-
-	# 					# Rinfreschiamo ENTRAMBI i widget reattivi
-	# 					self.render_menu_master_as_buttons.refresh()
-	# 					self.render_user_zone.refresh()
-
-	# 					# Ritorniamo alla pagina di login
-	# 					# ui.navigate.to('/login')
-
-	# 			ui.button(icon='logout', on_click=_handle_logout).props('round flat ripple dense').classes(
-	# 				'text-red-500 hover:text-red-700'
-	# 			).tooltip('Disconnetti')
-	# 	return None
-
 	@ui.refreshable_method
 	def render_user_zone(self):
-		is_logged = is_loggedin()
-		if is_logged:
-			user = get_logged_username()
-			user_image = user[0].upper()
-		else:
-			user = 'Accedi a nicegui_learning'
-			user_image = '?'
 
 		def _navigate_to_login():
 			ui.navigate.to(SIGNIN)
@@ -109,7 +71,9 @@ class WidgetsLayout:
 
 		def _handle_logout():
 
-			logout()
+			# reset cookie e user state
+			AuthState.logout()
+
 			ui.notify('Sessione chiusa con successo', type='info')
 
 			# Rinfreschiamo ENTRAMBI i widget reattivi
@@ -118,60 +82,73 @@ class WidgetsLayout:
 
 			# Ritorniamo alla pagina di login
 			ui.navigate.to(SIGNIN)
+			return
 
-		with ui.avatar(size='sm').classes('cursor-pointer shadow-md text-white bg-indigo-600! dark:bg-indigo-500!'):
-			ui.label(user_image)  # .classes('dark:text-blue-200')
-			# ui.image(utente_corrente["avatar_url"])
+		user_state = UserStorage.get_user_state()
+		logger.info(f'user_state: {user_state}')
 
-			with (
-				ui.menu()
-				.props('auto-close')
-				.classes('w-64 p-2 bg-slate-100 text-slate-800 dark:bg-slate-900  dark:text-blue-200') as menu
-			):
+		# layout_controls = LayoutControls()
+		with ui.element('div').classes('relative flex items-center justify-end'):
+			avatar_display = UserAvatar('sm', user_state).classes('cursor-pointer')
+
+			with ui.menu().props('auto-close').classes('w-48') as menu:
+				menu.props('anchor="bottom right" self="top right" :offset="[0, 8]"')
+
 				with ui.column().classes(
 					'items-center p-3 rounded-md mb-2 bg-slate-100 text-slate-800 dark:bg-slate-800  dark:text-blue-200'
 				):
-					with ui.avatar(size='lg').classes(
-						'mb-1 text-white bg-indigo-600! dark:bg-indigo-500!'
-					):  # .style(f'background-image: url({utente_corrente["avatar_url"]}); background-size: cover;')
-						ui.label(user_image)
-
-					ui.label(user).classes('font-bold text-blue-600 dark:text-blue-200 text-lg')
-
-					if not is_logged:
+					UserAvatar('xl', user_state).classes('mb-1 btn-indigo')
+					if user_state:
+						ui.label(user_state.username).classes('font-bold text-blue-600 dark:text-blue-200 text-lg')
+					else:
 						with ui.row().classes('w-full items-center justify-center'):
 							ui.button('Accedi', on_click=_navigate_to_login).props('no-caps rounded').classes(
 								'text-white bg-indigo-600! dark:bg-indigo-500!'
 							)
 						return
 
-				ui.menu_item('Profilo', on_click=lambda: ui.navigate.to('/profile'))
+				if user_state:
+					# Opzioni per utente loggato
+					ui.item('Il mio Profilo', on_click=lambda: ui.navigate.to('/profile')).props('v-close-popup')
+					# ui.item('Impostazioni', on_click=lambda: ui.notify('Apri impostazioni...')).props('v-close-popup')
+					ui.separator()
+					ui.item('Logout', on_click=_handle_logout).props('v-close-popup').classes('text-red')
+				# else:
+				# 	# Opzioni per utente anonimo
+				# 	ui.item('Accedi / Login', on_click=lambda: ui.notify('Apri schermata login...')).props(
+				# 		'v-close-popup'
+				# 	)
+				# 	ui.item('Registrati', on_click=lambda: ui.notify('Apri registrazione...')).props('v-close-popup')
 
-				ui.separator()
+			avatar_display.on('click', menu.open)
 
-				ui.menu_item('Logout', on_click=_handle_logout)
+			# with (
+			# 	ui.menu()
+			# 	.props('auto-close')
+			# 	.classes('w-64 p-2 bg-slate-100 text-slate-800 dark:bg-slate-900  dark:text-blue-200') as menu
+			# ):
+			# 	with ui.column().classes(
+			# 		'items-center p-3 rounded-md mb-2 bg-slate-100 text-slate-800 dark:bg-slate-800  dark:text-blue-200'
+			# 	):
+			# 		with ui.avatar(size='lg').classes(
+			# 			'mb-1 text-white bg-indigo-600! dark:bg-indigo-500!'
+			# 		):  # .style(f'background-image: url({utente_corrente["avatar_url"]}); background-size: cover;')
+			# 			ui.label(user_image)
 
-	# def render_user_zone_minimal(self):
-	# 	def go_to_profile():
-	# 		ui.notify('Reindirizzamento alla pagina del profilo...')
+			# 		ui.label(user).classes('font-bold text-blue-600 dark:text-blue-200 text-lg')
 
-	# 	def do_logout():
-	# 		ui.notify('Logout effettuato con successo!')
+			# 		if not UserStateManager.is_authenticated():
+			# 			with ui.row().classes('w-full items-center justify-center'):
+			# 				ui.button('Accedi', on_click=_navigate_to_login).props('no-caps rounded').classes(
+			# 					'text-white bg-indigo-600! dark:bg-indigo-500!'
+			# 				)
+			# 			return
 
-	# 	with ui.row().classes('items-center cursor-pointer'):
-	# 		is_logged = is_loggedin()
-	# 		if is_logged:
-	# 			initial_user = get_logged_username()[0].upper()
-	# 		else:
-	# 			initial_user = '?'
+			# 	ui.menu_item('Profilo', on_click=lambda: ui.navigate.to('/profile'))
 
-	# 		with ui.avatar(color='primary', text_color='white').props('size=sm'):
-	# 			ui.label(initial_user)
+			# 	ui.separator()
 
-	# 		with ui.menu().props('auto-close'):
-	# 			ui.menu_item('Profilo', on_click=go_to_profile)  # , icon="account_circle"
-	# 			ui.separator()
-	# 			ui.menu_item('Logout', on_click=do_logout)  # , icon="logout"
+			# 	ui.menu_item('Logout', on_click=_handle_logout)
 
 	@ui.refreshable_method
 	def render_menu_for_childrens_as_buttons(self, routes: List[dict[str, str]], callback: Callable[[], Any]):
@@ -206,7 +183,6 @@ class WidgetsLayout:
 	def render_menu_as_dialog(self, theme_manager: ThemeManager):
 		"""
 		Renderizza il menu con i link della route come dialog"""
-		# h-[calc(100vh-128px)]
 
 		with ui.dialog().props('position=right backdrop-filter="blur(8px) brightness(40%)"') as dialog:
 			with (
@@ -233,3 +209,30 @@ class WidgetsLayout:
 		ui.button(icon='more_vert', on_click=dialog.open).props('round flat ripple').classes(
 			'text-blue-800 dark:text-blue-200'
 		)
+
+	def render_menu_as_dropdown(self, theme_manager: ThemeManager):
+		with (
+			ui.button(
+				icon='more_vert',
+			)
+			.props('round flat ripple')
+			.classes('text-blue-800 dark:text-blue-200')
+		):
+			with (
+				ui.menu()
+				# .props('auto-close')
+				.classes('w-72 p-4 bg-slate-100 text-slate-800 dark:bg-slate-900  dark:text-blue-200') as menu
+			):
+				with ui.row().classes('w-full'):
+					# ui.button(icon='close', on_click=menu.close).props('round flat ripple').classes('ml-auto')
+
+					# ui.separator().classes('w-full')
+
+					with ui.column().classes('w-full'):
+						self.render_menu_master_as_buttons(menu.close)
+
+					ui.separator().classes('w-full')
+
+					with ui.row().classes('items-baseline'):
+						ui.label('Dark mode:').classes('text-lg')
+						theme_choice(theme_manager, menu)

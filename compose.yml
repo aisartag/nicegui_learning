@@ -3,10 +3,12 @@ services:
       build: .
       container_name: nicegui_learning
       ports:
-        - "8080:8080"
+        - "9000:8080"
       restart: unless-stopped
       volumes:
-        - ./app:/nicegui_learning/app
+        - ./app:/nicegui_learning/app 
+        - ./logs:/nicegui_learning/logs 
+        - ./data_storage:/nicegui_learning/data_storage
       environment:
         - WATCHFILES_FORCE_POLLING=true
         - DB_URL=postgresql+asyncpg://user:aisar@db:5432/nicegui_learning_db

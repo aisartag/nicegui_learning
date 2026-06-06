@@ -1,7 +1,7 @@
 import logging
 
 # subscribed events
-from components.layout_events import loggedin_completed
+from components.layout_events import loggedin_completed, user_state_modified
 from components.layout_widgets import WidgetsLayout
 from core.log_loader import configExtra
 from nicegui import Client, app, ui
@@ -45,6 +45,9 @@ class MasterLayout:
 		# subscribe events di loggedin per aggiornare il layout
 		loggedin_completed.subscribe(self.refresh_widgets)
 
+		# subscribe events di avatar per aggiornare il layout
+		user_state_modified.subscribe(self.refresh_widgets)
+
 	def handle_layout_header_toggle(self, is_visible: bool):
 		self.header.visible = is_visible
 
@@ -62,14 +65,16 @@ class MasterLayout:
 			)
 
 			# brand
-			with ui.row().classes('gt-sm items-center tracking-tight'):
+			with ui.row().classes('items-center tracking-tight'):
+				ui.image('/public/images/e=mc2-1.png').classes('w-8 h-8 lg:w-12 lg:h-12')
 				ui.link('Nicegui Learning', '/').classes(
-					'font-semibold px-4 py-2 no-underline text-xl text-blue-800 dark:text-blue-200'
+					'gt-sm font-semibold px-4 py-2 no-underline text-lg text-blue-600 dark:text-blue-200'
 				)
 
 			with ui.row().classes('items-center flex-1 justify-center tracking-tight'):
 				self.screen_changed()
 
+			# visibile su desktop (gt-sm >= 1024px)
 			with ui.row().classes('items-center gt-sm tracking-tight'):
 				self.widgets.render_menu_master_as_buttons()
 
@@ -78,11 +83,14 @@ class MasterLayout:
 					'round ripple flat'
 				).classes('text-blue-800 dark:text-blue-200')
 
-			# WidgetsLayout.render_menu_as_dialog(self.theme_manager)
+			# visibile su mobile (lt-md < 1024px) render menu principale come dialog o dropdown
 			with ui.row().classes('items-center tracking-tight lt-md'):
-				self.widgets.render_menu_as_dialog(self.theme_manager)
+				# self.widgets.render_menu_as_dialog(self.theme_manager)
+				self.widgets.render_menu_as_dropdown(self.theme_manager)
 
+			# user zone
 			with ui.row().classes('items-center tracking-tight'):
+				logger.info('layout_master:render_user_zone')
 				self.widgets.render_user_zone()
 
 		with ui.column().classes(

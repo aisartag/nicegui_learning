@@ -3,14 +3,15 @@ from collections.abc import Callable
 from types import MappingProxyType
 from typing import cast, get_args
 
-from auth.services.login_state import is_loggedin
-from auth.views.login_view import LoginView
+from auth.services.auth_state import AuthState
 from core.log_loader import configExtra
 from nicegui import ui
 from routing.route_childrens import ChildrenRegistry
 from routing.route_interfaces import PATHS_ROOT, TypedRouteAttr, TypedRoutes
 from views.dashboard_view import DashboardView
 from views.home_view import HomeView
+from views.login_view import LoginView
+from views.profile_view import ProfileView
 from views.register_view import RegisterView
 from views.settings_view import SettingsView
 
@@ -41,6 +42,13 @@ class MasterRoute:
 			'component': RegisterView,
 			'childrens': [],
 			'guard': 'sign',
+		},
+		'/profile': {
+			'label': 'Profile',
+			'icon': 'profile',
+			'component': ProfileView,
+			'childrens': [],  # ChildrenRegistry.PROFILE_CHILDREN,
+			'guard': 'protected',
 		},
 	}
 	ROUTES = MappingProxyType(_ROUTES)
@@ -82,7 +90,7 @@ class MasterRoute:
 		route: TypedRouteAttr = self.ROUTES[cast(PATHS_ROOT, path)]
 
 		guard = route.get('guard')
-		is_logged = is_loggedin()
+		is_logged = AuthState.is_authenticated()
 
 		# Inibisce se loggedin di navigare su pagine con guard='sign'
 		if guard == 'sign' and is_logged:

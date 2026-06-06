@@ -1,15 +1,15 @@
 import logging
 
-from auth.schemas.login_schema import LoginSchema, get_clean_errors
 from auth.services.auth_service import AuthService
-
-# events import
 from components.layout_events import loggedin_completed
 from core.log_loader import configExtra
 from database.engine import AsyncSessionLocal
-from nicegui import PageArguments, ui
+from exceptions import InvalidCredentialsException
+from nicegui import PageArguments, app, ui
 from pydantic import ValidationError
 from routing.route_interfaces import PROTECTED_ROUTE_DEFAULT, SIGNUP
+from schemas.login_schema import LoginSchema, get_clean_errors
+from state.user_state import UserStorage
 
 NAME = 'Login'
 
@@ -22,13 +22,13 @@ def LoginView(args: PageArguments):
 	with (
 		ui.card()
 		.props('bordered')
-		.classes('mx-auto bg-slate-200 text-slate-800 dark:bg-slate-900  dark:text-blue-200')
+		.classes('mx-auto bg-slate-200 text-blue-800 dark:bg-slate-900  dark:text-blue-200')
 		.style('max-width:480px; min-width:384px;')
 	):
 		with ui.card_section().classes('w-full'):
 			with ui.row().classes('justify-center items-center text-2xl p-4'):
 				with ui.column().classes('my-2 items-center'):
-					ui.image('/static/images/e=mc2-1.png').classes('w-16 h-16')
+					ui.image('/public/images/e=mc2-1.png').classes('w-16 h-16')
 					ui.label('Entra nel tuo account')
 
 			with ui.column().classes('my-4'):  # .classes('justify-center items-center border-3 border-blue-600 p-4'):
@@ -63,18 +63,27 @@ def LoginView(args: PageArguments):
 						password=password_input.value or '',
 					)
 
-					async with AsyncSessionLocal() as session:
+					async with AsyncSessionLocal.begin() as session:
 						auth_service = AuthService(session)
-						result = await auth_service.login(data.email, data.password)
+						user_orm = await auth_service.verify_credential(data.email, data.password)
 
-					if not result:
-						ui.notify('Login fallito', type='negative')
-						return
-					else:
-						ui.notify('Login completato con successo!', type='positive')
+					if user_orm:
+						app.storage.user['authenticated'] = True
+						app.storage.user['user_id'] = user_orm.id
+						app.storage.user['username'] = user_orm.username
+
+						# attach UserStorage per session
+						await UserStorage.login_user(user_orm)
+
+						ui.notify(f"Login effettuato. Benvenuto '{user_orm.username}'!")
+
 						loggedin_completed.emit()
 
 						ui.navigate.to(args.query_parameters.get('redirect_to', PROTECTED_ROUTE_DEFAULT))
+
+					else:
+						ui.notify('Login fallito', type='negative')
+						return
 
 				except ValidationError as e:
 					# ui.notify(f'Error: {e}', type='negative')
@@ -91,14 +100,18 @@ def LoginView(args: PageArguments):
 							all_inputs[field_name].update()
 
 					ui.notify('Please fix the errors in the form.', type='negative')
+
+				except InvalidCredentialsException as e:
+					# Cattura l'errore di login, il database ha già fatto rollback autonomamente
+					ui.notify(str(e), type='negative')
+					logger.error(e)
+
 				except Exception as e:
 					ui.notify(f'Error: {e}', type='negative')
 					logger.error(e)
 
-		with ui.card_actions().classes('w-full gap-y-10'):
-			ui.button('Login', on_click=on_submit).props('no-caps').classes(
-				'w-full text-white bg-indigo-600! dark:bg-indigo-500!'
-			)
+		with ui.card_actions().classes('w-full gap-y-8'):
+			ui.button('Login', on_click=on_submit).props('no-caps').classes('w-full btn-indigo!')
 			ui.link('Vai alla Home page', '/').classes(
 				'no-underline text-sm text-blue-800 dark:text-blue-200 w-full text-right pr-1'
 			)

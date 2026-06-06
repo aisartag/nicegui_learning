@@ -1,9 +1,15 @@
 import logging
+import sys
 
+from auth.services.auth_state import AuthState
 from components.layout_master import MasterLayout
 from core.log_element_handler import ClientFilter, LogElementHandler
 from core.log_loader import configExtra
+from database.engine import AsyncSessionLocal
 from nicegui import app, ui
+from services.user_service import UserService
+from state.user_state import UserStorage
+from themes.global_styles import add_tailwind_styles
 
 # from components.layout import Layout
 # from routing.route_childrens import ChildrenRegistry
@@ -34,11 +40,25 @@ root_logger = logging.getLogger(configExtra['root_name'])
 
 async def root():
 
-	# await client.connected()
+	add_tailwind_styles()
 
 	logger.info(f'Root avviato - log filter_by_client:{configExtra["filter_by_client"]}')
 
 	logger.info(f'Inizio esecuzione root.{configExtra["filter_by_client"]}')
+
+	# refresh stato user per utenti autenticati
+	user_id = AuthState.get_authenticated_user_id()
+
+	if user_id:
+		async with AsyncSessionLocal() as session:
+			user_service = UserService(session)
+			user_orm = await user_service.get_user_with_profile(user_id)
+			if user_orm:
+				await UserStorage.login_user(user_orm)
+			else:
+				logger.error(f'Errore ripristino stato utente {user_id}')
+				ui.notify('Utente non trovato', type='negative')
+				sys.exit(1)
 
 	MasterLayout()
 
