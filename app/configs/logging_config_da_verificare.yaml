@@ -23,7 +23,7 @@ handlers:
     (): logging.handlers.RotatingFileHandler
     level: DEBUG
     formatter: generic
-    filename: "logs/sight.log" # Puntiamo alla cartella dei volumi definita nel compose "placeholder.log"
+    filename: "logs/sight.log" # Puntiamo alla cartella dei volumi definita nel compose
     maxBytes: 1048576
     backupCount: 5
 
@@ -34,14 +34,15 @@ root:
 loggers:
   watchfiles.main:
     level: WARNING
-  uvicorn:         # Spesso utile silenziare anche il server sotto NiceGUI
+  uvicorn:         
     level: WARNING
-     # 👇 sqlalchemy
+  # 👇 AGGIUNGI QUESTO BLOCCO PER SQLALCHEMY
   sqlalchemy.engine:
     level: INFO # Verrà sovrascritto dinamicamente da Python
     handlers: [console, file]
     propagate: false
 
+  # 👇 AGGIUNGI QUESTO BLOCCO PER SQLALCHEMY
   sqlalchemy.pool:
     level: INFO # Verrà sovrascritto dinamicamente da Python
     handlers: [console, file]

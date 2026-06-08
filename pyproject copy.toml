@@ -13,6 +13,12 @@ dependencies = [
     "sqlalchemy>=2.0.50",
 ]
 
+[tool.uv]
+override-dependencies = [
+    # Se la piattaforma è Linux (Docker), forza una condizione impossibile 
+    # che impedisce l'installazione di pywebview senza rompere macOS/Windows.
+    "pywebview ; sys_platform == 'linux' and python_version < '0.0'"
+]
 
 [dependency-groups]
 dev = [

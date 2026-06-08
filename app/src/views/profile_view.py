@@ -157,22 +157,27 @@ async def ProfileView():
 	user_profile_view = UserProfileView(profile_state)
 
 	with ui.card().classes('m-auto w-[60vw] card-custom border-1 border-red-600 '):
+		with ui.row().classes('w-full justify-center items-center'):
+			user_profile_view.image_avatar_render()
+
+		ui.separator().classes('w-full')
+
 		with ui.row().classes('w-full gap-8 items-start  no-wrap grid grid-cols-1 lg:grid-cols-2 gap-8'):
 			with ui.column().classes('w-full items-center'):
 				ui.label('Foto Profilo').classes('text-sm font-semibold text-slate-500')
 
-				current_avatar = UserStorage.get_current_avatar_url()
-				logger.info(f'current_avatar:{current_avatar}')
+				# current_avatar = UserStorage.get_current_avatar_url()
+				# logger.info(f'current_avatar:{current_avatar}')
 
-				user_profile_view.image_avatar_render()
 				user_profile_view.upload_avatar_render()
 
 			ui.separator().classes('lt-md w-full')
 
 			with ui.column().classes('w-full items-center'):
 				ui.label('Informazioni Personali').classes('text-sm font-semibold text-slate-500')
-				current_bio = UserStorage.get_current_bio()
-				logger.info(f'Bio info:{current_bio}')
+
+				# current_bio = UserStorage.get_current_bio()
+				# logger.info(f'Bio info:{current_bio}')
 
 				# bio_textarea =
 				user_profile_view.bio_render()

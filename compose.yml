@@ -12,6 +12,10 @@ services:
       environment:
         - WATCHFILES_FORCE_POLLING=true
         - DB_URL=postgresql+asyncpg://user:aisar@db:5432/nicegui_learning_db
+        # 👇 FORZA UV A IGNORARE I PACCHETTI DEV ANCHE DURANTE IL LIVE-RELOAD DEI VOLUMI
+        - UV_NO_DEV=1
+        # 👇 Impedisce a uv di cercare o ricreare ambienti virtuali esterni
+        - UV_PROJECT_ENVIRONMENT=/nicegui_learning/.venv
       depends_on:
         db:
           condition: service_healthy # Attende che Postgres sia realmente pronto

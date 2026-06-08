@@ -1,0 +1,94 @@
+# ruff: noqa: E402
+import logging
+import multiprocessing
+import sys
+from pathlib import Path
+
+from nicegui import app, native, ui
+
+# 1. LOGGING DI EMERGENZA/AVVIO
+# Configura un logger di base immediato per non perdere nulla prima del bootstrap.
+# Usiamo 'force=True' (disponibile da Python 3.8+) per assicurarci che questa
+# configurazione basilare possa poi essere sovrascritta pulitamente dal tuo bootstrap.
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', force=True)
+early_logger = logging.getLogger('early_init')
+
+early_logger.info('Script main.py avviato. Inizializzazione percorsi...')
+
+# Configurazione percorsi (PyInstaller/WSL)
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+	base_path = Path(sys._MEIPASS)  # type: ignore
+else:
+	base_path = Path(__file__).parent
+
+# Aggiunge la cartella 'src' al percorso di ricerca di Python
+src_path = str(base_path / 'src')
+if src_path not in sys.path:
+	sys.path.insert(0, src_path)
+
+
+# moduli locali
+from database.connect import do_connection
+from src.core.boot import bootstrap
+from src.core.log_loader import configExtra
+from src.main import root
+
+# Configurazione finestra (fuori dal main)
+app.native.window_args['transparent'] = True
+app.native.window_args['resizable'] = True  # Esempio di altra opzione utile
+
+
+# Registrazione cartelle statiche
+# Icone, loghi
+app.add_static_files('/public', str(base_path / 'assets'))
+if getattr(sys, 'frozen', False):
+	# In produzione (EXE), la cartella data_storage sarà accanto all'eseguibile
+	exe_dir = Path(sys.executable).parent
+	app.add_static_files('/uploads', str(exe_dir / 'data_storage/avatars'))
+else:
+	app.add_static_files(
+		'/uploads', str(Path(__file__).parent.parent / 'data_storage/avatars')
+	)  # Avatar dinamici degli utenti
+
+
+if not bootstrap():
+	sys.exit(1)
+
+
+async def do_startup():
+
+	result = await do_connection(reset=False)
+	if not result:
+		early_logger.error('Errore di rete o di autenticazione (DB Offline o credenziali errate)')
+		exit(1)
+
+	early_logger.info('Connessione al DB avvenuta con successo')
+
+
+app.on_startup(do_startup)  # type: ignore
+
+
+# if __name__ in {'__main__', '__mp_main__'}:
+if __name__ == '__main__':
+	# Necessario per PyInstaller / Nuitka
+	multiprocessing.freeze_support()
+
+	early_logger.info('Esecuzione del bootstrap principale...')
+	if not bootstrap():
+		early_logger.error('Bootstrap fallito. Uscita.')
+		sys.exit(1)
+
+	root_logger = logging.getLogger(configExtra['root_name'])
+	root_logger.setLevel(logging.INFO)
+	root_logger.info('Inizio esecuzione')
+
+	# Avvio
+	ui.run(  # type: ignore
+		root,  # Passiamo la funzione che costruisce la UI
+		native=True,
+		reload=False,  # Obbligatorio per EXE
+		title='Nicegui learning Native',
+		port=native.find_open_port(),
+		window_size=(800, 640),
+		storage_secret='pizzeche',
+	)
