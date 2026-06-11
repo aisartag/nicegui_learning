@@ -66,11 +66,12 @@ class UserProfileView:
 		try:
 			file_name = e.file.name
 			file_bytes = await e.file.read()
+			user_id = AuthState.get_authenticated_user_id()
+			if user_id is None:
+				raise ValueError('Utente non autenticato')
+
 			async with AsyncSessionLocal() as session:
 				user_service = UserService(session)
-				user_id = AuthState.get_authenticated_user_id()
-				if user_id is None:
-					raise ValueError('Utente non autenticato')
 
 				# aggiorna avatar_url su database
 				new_avatar = await user_service.save_avatar(user_id, file_name, file_bytes)

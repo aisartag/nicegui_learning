@@ -18,6 +18,7 @@ dependencies = [
 dev = [
     "alembic>=1.18.4",
     "psycopg2-binary>=2.9.12",
+    "pyinstaller>=6.20.0",
     "ruff>=0.15.14",
 ]
 

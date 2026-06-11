@@ -31,34 +31,6 @@ class UserService:
 
 		logger.info(f'Registrazione di un nuovo utente: {username} {email} {clear_password}')
 
-		# async with self.session.begin():
-		# 	try:
-		# 		existing_user = await self.user_repo.get_user_by_email(email)
-		# 		if existing_user:
-		# 			raise ValueError(f"L'email '{email}' è già associata a un account.")
-
-		# 		existing_user = await self.user_repo.get_user_by_name(username)
-		# 		if existing_user:
-		# 			raise ValueError(f"Lo username '{username}'è già in uso.")
-
-		# 		# Trasformiamo la stringa in chiaro in un hash non invertibile
-		# 		password_hash = CryptoService.hash_password(password_in_chiaro)
-
-		# 		# Creazione dell'utente (passando l'hash, non la password in chiaro!)
-		# 		user_orm = await self.user_repo.create(username=username, email=email, password_hash=password_hash)
-
-		# 		# 2. IL TRUCCO CHIAVE: il flush invia i dati al database IMMEDIATAMENTE.
-		# 		# Postgres genera l'ID autoincrementale, ma non chiude la transazione.
-		# 		await self.session.flush()
-
-		# 		#  Creazione del profilo collegato via .flush() interno
-		# 		await self.profile_repo.create_for_user(user_id=user_orm.id, bio=bio)
-
-		# 		return user_orm
-
-		# 	except IntegrityError:
-		# 		raise RegistrationException()
-
 		# 1. Il try avvolge TUTTA la transazione, incluso il commit automatico di begin()
 		try:
 			async with self.session.begin():
@@ -154,10 +126,13 @@ class UserService:
 			return db_relative_path
 
 		except Exception as db_error:
-			# SE IL REPOSITORY FALLISCE: roll-back del file fisico
-			if full_path_file.exists():
-				full_path_file.unlink()
-			# Rilanciamo l'errore per farlo intercettare a NiceGUI
+			# # SE IL REPOSITORY FALLISCE: roll-back del file fisico
+			def _rollback_disk_sync():
+				if full_path_file.exists():
+					full_path_file.unlink()
+
+			await asyncio.to_thread(_rollback_disk_sync)
+			logger.error(f'Salvataggio DB fallito per utente {user_id}. File di rollback rimosso.')
 			raise Exception(f'Salvataggio Database fallito, rollback file eseguito: {db_error}')
 
 	async def save_bio(self, user_id: int, bio: str | None):

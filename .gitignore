@@ -11,5 +11,7 @@ UV.md
 .env
 .env.docker
 notes/**/*
+OLD_RUN/**/*
+Ai/**/*
 
 
