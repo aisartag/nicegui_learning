@@ -2,13 +2,13 @@
 
 
 from database.engine import AsyncSessionLocal
+from database.unit_of_work import UnitOfWork
 from exceptions import InvalidCredentialsException
 from models.user import User
 
 # from nicegui import app
 from repositories.user_repository import UserRepository
 from services.crypto_service import CryptoService
-from unit_of_work import UnitOfWork
 
 
 class AuthService:

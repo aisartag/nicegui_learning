@@ -6,13 +6,13 @@ from pathlib import Path
 from core.log_loader import configExtra
 from core.paths import ProjectPaths
 from database.engine import AsyncSessionLocal
+from database.unit_of_work import UnitOfWork
 from exceptions import RegistrationException
 from models.user import User
 from repositories.profile_repository import ProfileRepository
 from repositories.user_repository import UserRepository
 from services.crypto_service import CryptoService  # Nuovo import
 from sqlalchemy.exc import IntegrityError
-from unit_of_work import UnitOfWork
 
 logger = logging.getLogger(f'{configExtra["root_name"]}.{__name__}')
 

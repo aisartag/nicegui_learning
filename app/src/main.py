@@ -5,7 +5,6 @@ from auth.services.auth_state import AuthState
 from components.layout_master import MasterLayout
 from core.log_element_handler import ClientFilter, LogElementHandler
 from core.log_loader import configExtra
-from database.engine import AsyncSessionLocal
 from nicegui import app, ui
 from services.user_service import UserService
 from state.user_state import UserStorage
@@ -50,15 +49,14 @@ async def root():
 	user_id = AuthState.get_authenticated_user_id()
 
 	if user_id:
-		async with AsyncSessionLocal() as session:
-			user_service = UserService(session)
-			user_orm = await user_service.get_user_with_profile(user_id)
-			if user_orm:
-				await UserStorage.login_user(user_orm)
-			else:
-				logger.error(f'Errore ripristino stato utente {user_id}')
-				ui.notify('Utente non trovato', type='negative')
-				sys.exit(1)
+		user_service = UserService()
+		user_orm = await user_service.get_user_with_profile(user_id)
+		if user_orm:
+			await UserStorage.login_user(user_orm)
+		else:
+			logger.error(f'Errore ripristino stato utente {user_id}')
+			ui.notify('Utente non trovato', type='negative')
+			sys.exit(1)
 
 	MasterLayout()
 
