@@ -3,23 +3,22 @@ name = "nicegui-learning"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.14.5"
 dependencies = [
     "asyncpg>=0.31.0",
     "bcrypt>=5.0.0",
-    "nicegui>=3.12.1",
+    "nicegui>=3.13.0",
     "pydantic[email]>=2.13.4",
     "pywebview>=6.2.1",
     "sqlalchemy>=2.0.50",
 ]
 
-
 [dependency-groups]
 dev = [
     "alembic>=1.18.4",
-    "psycopg2-binary>=2.9.12",
+    "psycopg2>=2.9.12",
     "pyinstaller>=6.20.0",
-    "ruff>=0.15.14",
+    "ruff>=0.15.16",
 ]
 
 [tool.ruff]
@@ -29,3 +28,4 @@ line-length = 120
 quote-style = "single"
 indent-style = "tab"
 docstring-code-format = true
+

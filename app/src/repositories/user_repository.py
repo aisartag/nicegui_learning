@@ -32,6 +32,7 @@ class UserRepository:
 
 		# 1. Aggiunge l'oggetto alla sessione (in memoria)
 		self.session.add(new_user)
+		await self.session.flush()  # Invia i dati al DB e popola user.id
 
 		# Ora 'new_user.id' è popolato e pronto per essere usato dal profilo!
 		return new_user

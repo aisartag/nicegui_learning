@@ -71,7 +71,7 @@ class UserProfileView:
 				raise ValueError('Utente non autenticato')
 
 			async with AsyncSessionLocal() as session:
-				user_service = UserService(session)
+				user_service = UserService()
 
 				# aggiorna avatar_url su database
 				new_avatar = await user_service.save_avatar(user_id, file_name, file_bytes)
@@ -105,7 +105,7 @@ class UserProfileView:
 	async def save_bio(self):
 		try:
 			async with AsyncSessionLocal() as session:
-				user_service = UserService(session)
+				user_service = UserService()
 				user_id = AuthState.get_authenticated_user_id()
 				if user_id is None:
 					raise ValueError('Utente non autenticato')

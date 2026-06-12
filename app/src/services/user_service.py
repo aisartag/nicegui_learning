@@ -5,22 +5,21 @@ from pathlib import Path
 
 from core.log_loader import configExtra
 from core.paths import ProjectPaths
+from database.engine import AsyncSessionLocal
 from exceptions import RegistrationException
 from models.user import User
 from repositories.profile_repository import ProfileRepository
 from repositories.user_repository import UserRepository
 from services.crypto_service import CryptoService  # Nuovo import
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
+from unit_of_work import UnitOfWork
 
 logger = logging.getLogger(f'{configExtra["root_name"]}.{__name__}')
 
 
 class UserService:
-	def __init__(self, session: AsyncSession):
-		self.session = session
-		self.user_repo = UserRepository(self.session)
-		self.profile_repo = ProfileRepository(self.session)
+	def __init__(self):
+		self.session_factory = AsyncSessionLocal
 
 	async def register_user_with_profile(
 		self, username: str, email: str, clear_password: str, bio: str | None = None
@@ -33,25 +32,28 @@ class UserService:
 
 		# 1. Il try avvolge TUTTA la transazione, incluso il commit automatico di begin()
 		try:
-			async with self.session.begin():
-				# Controlli preventivi (facoltativi ma utili per messaggi puliti)
-				existing_email = await self.user_repo.get_user_by_email(email)
-				if existing_email:
-					raise ValueError(f"L'email '{email}' è già associata a un account.")
+			async with UnitOfWork(self.session_factory) as uow:
+				user_repo = UserRepository(uow.session)
+				profile_repo = ProfileRepository(uow.session)
 
-				existing_name = await self.user_repo.get_user_by_name(username)
-				if existing_name:
-					raise ValueError(f"Lo username '{username}' è già in uso.")
+				# Controlli preventivi (facoltativi ma utili per messaggi puliti)
+				# existing_email = await self.user_repo.get_user_by_email(email)
+				# if existing_email:
+				# 	raise ValueError(f"L'email '{email}' è già associata a un account.")
+
+				# existing_name = await self.user_repo.get_user_by_name(username)
+				# if existing_name:
+				# 	raise ValueError(f"Lo username '{username}' è già in uso.")
 
 				# Logica di business
 				password_hash = CryptoService.hash_password(clear_password)
-				user_orm = await self.user_repo.create(username=username, email=email, password_hash=password_hash)
+				user_orm = await user_repo.create(username=username, email=email, password_hash=password_hash)
 
 				# Invia i dati a Postgres per generare l'ID (scatta IntegrityError se c'è un duplicato concorrente)
-				await self.session.flush()
+				# await self.session.flush()
 
 				# Creazione del profilo legato
-				await self.profile_repo.create_for_user(user_id=user_orm.id, bio=bio)
+				await profile_repo.create_for_user(user_id=user_orm.id, bio=bio)
 
 				# Qui finisce il blocco: SQLAlchemy prova a fare il COMMIT.
 				# Se il commit fallisce, salta direttamente all'except esterno.
@@ -74,9 +76,12 @@ class UserService:
 
 	async def get_user_with_profile(self, user_id: int) -> User | None:
 		"""Cerca un utente tramite ID (Asincrono)."""
-		user = await self.user_repo.get_user_with_profile(user_id)
+		async with UnitOfWork(self.session_factory) as uow:
+			user_repo = UserRepository(uow.session)
 
-		return user
+			user = await user_repo.get_user_with_profile(user_id)
+
+			return user
 
 	async def save_avatar(self, user_id: int, original_filename: str, file_bytes: bytes) -> str:
 		"""
@@ -121,9 +126,10 @@ class UserService:
 
 		# 6. Azione del Repository con Protezione (Try/Except)
 		try:
-			async with self.session.begin():
-				await self.profile_repo.update_avatar_path(user_id, db_relative_path)
-			return db_relative_path
+			async with UnitOfWork(self.session_factory) as uow:
+				profile_repo = ProfileRepository(uow.session)
+				await profile_repo.update_avatar_path(user_id, db_relative_path)
+				return db_relative_path
 
 		except Exception as db_error:
 			# # SE IL REPOSITORY FALLISCE: roll-back del file fisico
@@ -137,8 +143,9 @@ class UserService:
 
 	async def save_bio(self, user_id: int, bio: str | None):
 		try:
-			async with self.session.begin():
-				return await self.profile_repo.update_bio(user_id, bio)
+			async with UnitOfWork(self.session_factory) as uow:
+				profile_repo = ProfileRepository(uow.session)
+				return await profile_repo.update_bio(user_id, bio)
 		except Exception as db_error:
 			raise Exception(f'Salvataggio Database fallito, rollback file eseguito: {db_error}')
 
