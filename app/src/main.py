@@ -1,18 +1,13 @@
 import logging
-import sys
 
-from auth.services.auth_state import AuthState
-from components.layout_master import MasterLayout
-from core.log_element_handler import ClientFilter, LogElementHandler
-from core.log_loader import configExtra
 from nicegui import app, ui
-from services.user_service import UserService
-from state.user_state import UserStorage
-from themes.global_styles import add_tailwind_styles
 
-# from components.layout import Layout
-# from routing.route_childrens import ChildrenRegistry
-# from routing.route_master import MasterRoute
+from src.components.layout_master import MasterLayout
+from src.core.log_element_handler import ClientFilter, LogElementHandler
+from src.core.setting_setup import SettingInit
+from src.state.state_check import user_state_refresh
+from src.state.user_state import UserStateService
+from src.themes.global_styles import add_tailwind_styles
 
 app.colors(
 	primary='#5898d4',
@@ -32,31 +27,18 @@ formatter = logging.Formatter(
 	datefmt='%Y-%m-%d %H:%M:%S',
 )
 
-
-logger = logging.getLogger(f'{configExtra["root_name"]}.{__name__}')
-root_logger = logging.getLogger(configExtra['root_name'])
+settings = SettingInit()
+logger = logging.getLogger(f'{settings.get_app_name()}.{__name__}')
+root_logger = logging.getLogger(f'{settings.get_app_name()}')
 
 
 async def root():
 
+	logger.info(f'Inizio esecuzione root is authenticated? : {UserStateService.is_authenticated()}')
+
+	await user_state_refresh()
+
 	add_tailwind_styles()
-
-	logger.info(f'Root avviato - log filter_by_client:{configExtra["filter_by_client"]}')
-
-	logger.info(f'Inizio esecuzione root.{configExtra["filter_by_client"]}')
-
-	# refresh stato user per utenti autenticati
-	user_id = AuthState.get_authenticated_user_id()
-
-	if user_id:
-		user_service = UserService()
-		user_orm = await user_service.get_user_with_profile(user_id)
-		if user_orm:
-			await UserStorage.login_user(user_orm)
-		else:
-			logger.error(f'Errore ripristino stato utente {user_id}')
-			ui.notify('Utente non trovato', type='negative')
-			sys.exit(1)
 
 	MasterLayout()
 

@@ -1,13 +1,15 @@
 import logging
 from typing import Any
 
-from core.log_loader import configExtra
-from models.user import User
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-logger = logging.getLogger(f'{configExtra["root_name"]}.{__name__}')
+from src.core.setting_setup import SettingInit
+from src.models.user import User
+
+settings = SettingInit()
+logger = logging.getLogger(f'{settings.get_app_name()}.{__name__}')
 
 
 class UserRepository:

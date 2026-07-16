@@ -2,15 +2,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from database.engine import Base  # <--- Importiamo la Base comune
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from src.database.db_setup import Base  # <--- Importiamo la Base comune
+
 # Questo blocco viene letto solo dai linter/IDE, non all'esecuzione
 if TYPE_CHECKING:
-	from models.profile import Profile
+	from src.models.profile import Profile
 
 
+# __table_args__ = {'extend_existing': True}
 class User(Base):
 	__tablename__ = 'users'
 

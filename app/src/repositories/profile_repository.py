@@ -1,7 +1,9 @@
 # repositories/profile_repository.py
-from models.profile import Profile
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.models.profile import Profile
 
 
 class ProfileRepository:

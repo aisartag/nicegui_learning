@@ -1,17 +1,19 @@
 import logging
 from typing import Dict
 
-from core.log_loader import configExtra
-from exceptions import RegistrationException
 from nicegui import ui
 from pydantic import ValidationError
-from routing.route_interfaces import SIGNIN
-from schemas.register_schema import RegisterSchema, get_clean_errors
-from services.user_service import UserService
+
+from src.core.setting_setup import SettingInit
+from src.exceptions import RegistrationException
+from src.routing.route_interfaces import SIGNIN
+from src.schemas.register_schema import RegisterSchema, get_clean_errors
+from src.services.user_service import UserService
 
 NAME = 'Register'
 
-logger = logging.getLogger(f'{configExtra["root_name"]}.{__name__}')
+settings = SettingInit()
+logger = logging.getLogger(f'{settings.get_app_name()}.{__name__}')
 
 
 class FormData:

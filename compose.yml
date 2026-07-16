@@ -5,10 +5,12 @@ services:
       ports:
         - "9000:8080"
       restart: unless-stopped
+      
       volumes:
         - ./app:/nicegui_learning/app 
         - ./logs:/nicegui_learning/logs 
         - ./data_storage:/nicegui_learning/data_storage
+        - ./config:/nicegui_learning/config
       environment:
         - WATCHFILES_FORCE_POLLING=true
         - DB_URL=postgresql+asyncpg://user:aisar@db:5432/nicegui_learning_db

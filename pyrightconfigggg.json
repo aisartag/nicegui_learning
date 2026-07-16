@@ -1,0 +1,17 @@
+{
+    "include": ["app"],
+    "exclude": ["**/node_modules/**", "**/__pycache__/**", "**/.*", ".venv"],
+   
+    "extraPaths": [
+        "./app/src"
+    ],
+    "executionEnvironments": [
+        {
+            "root":"app"
+          
+        }
+    ],
+    "typeCheckingMode": "strict",
+    "pythonVersion": "3.14",
+    "pythonPlatform": "All"
+}

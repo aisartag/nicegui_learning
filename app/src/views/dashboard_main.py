@@ -1,12 +1,14 @@
-from nicegui import ui
 import logging
-from core.log_loader import configExtra
 
-NAME = "Dashboard Main"
+from nicegui import ui
 
+from src.core.setting_setup import SettingInit
 
-logger = logging.getLogger(f"{configExtra['root_name']}.{__name__}")
+NAME = 'Dashboard Main'
+
+settings = SettingInit()
+logger = logging.getLogger(f'{settings.get_app_name()}.{__name__}')
 
 
 def DashboardMain():
-    logger.info(f"{NAME} avviata:{ui.context.client.id}")
+	logger.info(f'{NAME} avviata:{ui.context.client.id}')

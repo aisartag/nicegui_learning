@@ -1,12 +1,12 @@
 import logging
 
-from core.log_loader import configExtra
 from nicegui import ui
+from src.core.setting_setup import SettingInit
 
 NAME = 'Profile Main'
 
-
-logger = logging.getLogger(f'{configExtra["root_name"]}.{__name__}')
+settings = SettingInit()
+logger = logging.getLogger(f'{settings.get_app_name()}.{__name__}')
 
 
 def ProfileMain():

@@ -2,9 +2,10 @@
 import logging
 from typing import Any, Protocol, cast, get_args, runtime_checkable
 
-from core.log_loader import configExtra
 from nicegui import events, ui
 from themes.theme_manager import ThemeLiteral, ThemeManager
+
+from src.core.setting_setup import SettingInit
 
 
 @runtime_checkable
@@ -12,7 +13,8 @@ class ClosableContainer(Protocol):
 	def close(self, *args: Any, **kwargs: Any) -> Any: ...
 
 
-logger = logging.getLogger(f'{configExtra["root_name"]}.{__name__}')
+config = SettingInit()
+logger = logging.getLogger(f'{config.get_app_name()}.{__name__}')
 
 
 def theme_choice(manager: ThemeManager, container: ClosableContainer | None = None):

@@ -1,14 +1,14 @@
 # services/auth_service.py
 
 
-from database.engine import AsyncSessionLocal
-from database.unit_of_work import UnitOfWork
-from exceptions import InvalidCredentialsException
-from models.user import User
+from src.database.db_setup import AsyncSessionLocal
+from src.database.unit_of_work import UnitOfWork
+from src.exceptions import InvalidCredentialsException
+from src.models.user import User
 
 # from nicegui import app
-from repositories.user_repository import UserRepository
-from services.crypto_service import CryptoService
+from src.repositories.user_repository import UserRepository
+from src.services.crypto_service import CryptoService
 
 
 class AuthService:

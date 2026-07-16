@@ -1,16 +1,17 @@
 from typing import List
 
-from routing.route_interfaces import TypedRouteChildrenValue
 from typing_extensions import Literal
-from views.dashboard_main import DashboardMain
-from views.profile.avatar_view import AvatarView
-from views.profile.bio_view import BioView
-from views.profile.profile_main import ProfileMain
-from views.report_view import ReportView
-from views.settings.security_view import SecurityView
-from views.settings.settings_main import SettingsMain
-from views.settings.typology_view import TypologyView
-from views.statistics_view import StatisticsView
+
+from src.routing.route_interfaces import TypedRouteChildrenValue
+from src.views.dashboard_main import DashboardMain
+from src.views.profile.avatar_view import AvatarView
+from src.views.profile.bio_view import BioView
+from src.views.profile.profile_main import ProfileMain
+from src.views.report_view import ReportView
+from src.views.settings.security_view import SecurityView
+from src.views.settings.settings_main import SettingsMain
+from src.views.settings.typology_view import TypologyView
+from src.views.statistics_view import StatisticsView
 
 PARENT_CHILDREN = Literal[
 	'DASHBOARD_CHILDREN', 'SETTINGS_CHILDREN', 'PROFILE_CHILDREN'

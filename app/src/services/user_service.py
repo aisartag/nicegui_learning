@@ -3,18 +3,19 @@ import hashlib
 import logging
 from pathlib import Path
 
-from core.log_loader import configExtra
-from core.paths import ProjectPaths
-from database.engine import AsyncSessionLocal
-from database.unit_of_work import UnitOfWork
-from exceptions import RegistrationException
-from models.user import User
-from repositories.profile_repository import ProfileRepository
-from repositories.user_repository import UserRepository
-from services.crypto_service import CryptoService  # Nuovo import
 from sqlalchemy.exc import IntegrityError
+from src.core.paths_enum import AVATARS_STATIC_URL, Paths
+from src.core.setting_setup import SettingInit
+from src.database.db_setup import AsyncSessionLocal
+from src.database.unit_of_work import UnitOfWork
+from src.exceptions import RegistrationException
+from src.models.user import User
+from src.repositories.profile_repository import ProfileRepository
+from src.repositories.user_repository import UserRepository
+from src.services.crypto_service import CryptoService  # Nuovo import
 
-logger = logging.getLogger(f'{configExtra["root_name"]}.{__name__}')
+settings = SettingInit()
+logger = logging.getLogger(f'{settings.get_app_name()}.{__name__}')
 
 
 class UserService:
@@ -76,9 +77,9 @@ class UserService:
 
 	async def get_user_with_profile(self, user_id: int) -> User | None:
 		"""Cerca un utente tramite ID (Asincrono)."""
+
 		async with UnitOfWork(self.session_factory) as uow:
 			user_repo = UserRepository(uow.session)
-
 			user = await user_repo.get_user_with_profile(user_id)
 
 			return user
@@ -102,7 +103,7 @@ class UserService:
 		ext = Path(original_filename).suffix.lower()
 		nome_file = f'{user_hash}{ext}'
 
-		target_folder = ProjectPaths.DATA_STORAGE_AVATARS / user_hash[0:2] / user_hash[2:4]
+		target_folder = Paths.AVATARS_DIR.value / user_hash[0:2] / user_hash[2:4]
 		target_folder.mkdir(parents=True, exist_ok=True)
 
 		for file_exists in target_folder.glob(f'{user_hash}.*'):
@@ -116,7 +117,7 @@ class UserService:
 		# with open(full_path_file, 'wb') as f:
 		# 	f.write(file_bytes)
 
-		db_relative_path = f'uploads/{user_hash[0:2]}/{user_hash[2:4]}/{nome_file}'
+		db_relative_path = f'{AVATARS_STATIC_URL}/{user_hash[0:2]}/{user_hash[2:4]}/{nome_file}'
 		# 1. Scrittura del NUOVO file in modo ASINCRONO per non bloccare NiceGUI
 		try:
 			# Esegue la scrittura sincrona in un thread thread-pool separato

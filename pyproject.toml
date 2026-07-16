@@ -7,8 +7,10 @@ requires-python = ">=3.14.5"
 dependencies = [
     "asyncpg>=0.31.0",
     "bcrypt>=5.0.0",
-    "nicegui>=3.13.0",
+    "nicegui==3.14.0",
+    "platformdirs>=4.10.0",
     "pydantic[email]>=2.13.4",
+    "pyinstaller>=6.21.0",
     "pywebview>=6.2.1",
     "sqlalchemy>=2.0.50",
 ]
@@ -17,15 +19,41 @@ dependencies = [
 dev = [
     "alembic>=1.18.4",
     "psycopg2>=2.9.12",
-    "pyinstaller>=6.20.0",
     "ruff>=0.15.16",
 ]
 
 [tool.ruff]
+# Dice a Ruff che la radice del progetto è la cartella corrente
+src = ["."]
 line-length = 120
 
 [tool.ruff.format]
 quote-style = "single"
 indent-style = "tab"
 docstring-code-format = true
+
+
+[tool.ruff.lint]
+# I = isort (ordina gli import)
+# TID = tidy-imports (può forzare le regole sugli import)
+select = ["I", "TID"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+# Forza Ruff a convertire o bloccare gli import relativi se preferisci quelli assoluti
+ban-relative-imports = "all"
+
+[tool.pyright]
+# Include tutto il progetto a partire dalla radice corrente
+include = ["."]
+exclude = ["**/node_modules", "**/__pycache__", ".venv", "**/.*"]
+
+# Riconosce l'ambiente virtuale creato da uv
+venvPath = "."
+venv = ".venv"
+
+# Specifica la versione reale del tuo progetto (es. 3.12 o 3.13)
+pythonVersion = "3.14" 
+typeCheckingMode = "strict" # "standard"  o "strict" se preferisci un controllo rigidissimo
+
+
 

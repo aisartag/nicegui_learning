@@ -1,6 +1,6 @@
-from database.engine import Base
-from models.profile import Profile
-from models.user import User
+from src.database.db_setup import Base
+from src.models.profile import Profile
+from src.models.user import User
 
 # In questo modo, quando qualcuno scriverà "import models",
 # Python leggerà questo file e caricherà sia User che Profile nella Base.

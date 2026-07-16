@@ -3,19 +3,22 @@ from collections.abc import Callable
 from types import MappingProxyType
 from typing import cast, get_args
 
-from auth.services.auth_state import AuthState
-from core.log_loader import configExtra
 from nicegui import ui
-from routing.route_childrens import ChildrenRegistry
-from routing.route_interfaces import PATHS_ROOT, TypedRouteAttr, TypedRoutes
-from views.dashboard_view import DashboardView
-from views.home_view import HomeView
-from views.login_view import LoginView
-from views.profile_view import ProfileView
-from views.register_view import RegisterView
-from views.settings_view import SettingsView
 
-logger = logging.getLogger(f'{configExtra["root_name"]}.{__name__}')
+from src.core.setting_setup import SettingInit
+from src.routing.route_childrens import ChildrenRegistry
+from src.routing.route_interfaces import PATHS_ROOT, TypedRouteAttr, TypedRoutes
+from src.state.user_state import UserStateService
+from src.views.dashboard_view import DashboardView
+from src.views.home_view import HomeView
+from src.views.login_view import LoginView
+from src.views.profile_view import ProfileView
+from src.views.register_view import RegisterView
+from src.views.settings_view import SettingsView
+
+settings = SettingInit()
+
+logger = logging.getLogger(f'{settings.get_app_name()}.{__name__}')
 
 
 class MasterRoute:
@@ -90,17 +93,16 @@ class MasterRoute:
 		route: TypedRouteAttr = self.ROUTES[cast(PATHS_ROOT, path)]
 
 		guard = route.get('guard')
-		is_logged = AuthState.is_authenticated()
 
 		# Inibisce se loggedin di navigare su pagine con guard='sign'
-		if guard == 'sign' and is_logged:
+		if guard == 'sign' and UserStateService.is_authenticated():
 			ui.navigate.to('/')  # home
 			return
 
 		# per nscondere la barra di navigazione per rotte 'sign
 		self.on_sign_layout(not guard == 'sign')
 
-		if guard == 'protected' and not is_logged:
+		if guard == 'protected' and not UserStateService.is_authenticated():
 			logger.info(f'Accesso negato. Salvo il redirect per: {path}')
 			# Passiamo il path originale (completo di eventuali sotto-pagine) nell'URL
 			self.on_sign_layout(False)

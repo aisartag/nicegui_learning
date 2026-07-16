@@ -3,17 +3,18 @@ from collections.abc import Callable
 from functools import partial
 from typing import Any, List
 
-from auth.services.auth_state import AuthState
-from components.select_theme import theme_choice
-from components.user_avater import UserAvatar
-from core.log_loader import configExtra
 from nicegui import ui
-from routing.route_interfaces import MENU_MASTER_EXCLUDE, SIGNIN  # , SIGNIN
-from routing.route_master import MasterRoute
-from state.user_state import UserStorage
-from themes.theme_manager import ThemeManager
 
-logger = logging.getLogger(f'{configExtra["root_name"]}.{__name__}')
+from src.components.select_theme import theme_choice
+from src.components.user_avater import UserAvatar
+from src.core.setting_setup import SettingInit
+from src.routing.route_interfaces import MENU_MASTER_EXCLUDE, SIGNIN  # , SIGNIN
+from src.routing.route_master import MasterRoute
+from src.state.user_state import UserStateService
+from src.themes.theme_manager import ThemeManager
+
+settings = SettingInit()
+logger = logging.getLogger(f'{settings.get_app_name()}.{__name__}')
 
 
 class WidgetsLayout:
@@ -32,8 +33,6 @@ class WidgetsLayout:
 			if cb:
 				cb()
 
-		is_logged = AuthState.is_authenticated()
-
 		routes = MasterRoute.get_router_links()
 		btnList: List[ui.button] = []
 
@@ -46,9 +45,9 @@ class WidgetsLayout:
 
 			if guard == 'public':
 				should_show = True
-			elif guard == 'sign' and not is_logged:
+			elif guard == 'sign' and not UserStateService.is_authenticated():
 				should_show = True
-			elif guard == 'protected' and is_logged:
+			elif guard == 'protected' and UserStateService.is_authenticated():
 				should_show = True
 
 			if should_show:
@@ -72,7 +71,7 @@ class WidgetsLayout:
 		def _handle_logout():
 
 			# reset cookie e user state
-			AuthState.logout()
+			UserStateService.on_logout()
 
 			ui.notify('Sessione chiusa con successo', type='info')
 
@@ -84,7 +83,8 @@ class WidgetsLayout:
 			ui.navigate.to(SIGNIN)
 			return
 
-		user_state = UserStorage.get_user_state()
+		user_state = UserStateService.get_cached_state()
+
 		logger.info(f'user_state: {user_state}')
 
 		# layout_controls = LayoutControls()

@@ -1,15 +1,16 @@
 import logging
 
-# subscribed events
-from components.layout_events import loggedin_completed, user_state_modified
-from components.layout_widgets import WidgetsLayout
-from core.log_loader import configExtra
-from nicegui import Client, app, ui
-from routing.route_master import MasterRoute
-from themes.theme_manager import ThemeManager
-from utils.screen_state import ScreenState
+from nicegui import Client, ui
 
-logger = logging.getLogger(f'{configExtra["root_name"]}.{__name__}')
+from src.components.layout_events import loggedin_completed, user_state_modified
+from src.components.layout_widgets import WidgetsLayout
+from src.core.setting_setup import SettingInit
+from src.routing.route_master import MasterRoute
+from src.themes.theme_manager import ThemeManager
+from src.utils.screen_state import ScreenState
+
+settings = SettingInit()
+logger = logging.getLogger(f'{settings.get_app_name()}.{__name__}')
 
 
 class MasterLayout:
@@ -18,7 +19,7 @@ class MasterLayout:
 		self.client: Client = ui.context.client
 
 		# apply_brand_theme()
-		self.theme_manager = ThemeManager(app.storage.user)
+		self.theme_manager = ThemeManager()
 
 		self.is_mobile = False
 		self.has_childrens = False

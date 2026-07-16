@@ -2,11 +2,13 @@ import logging
 from types import TracebackType
 from typing import Type
 
-from core.log_loader import configExtra
-from database.engine import AsyncSessionLocal
+from database.db_setup import AsyncSessionLocal
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-logger = logging.getLogger(f'{configExtra["root_name"]}.{__name__}')
+from src.core.setting_setup import SettingInit
+
+settings = SettingInit()
+logger = logging.getLogger(f'{settings.get_app_name()}.{__name__}')
 
 
 class UnitOfWork:

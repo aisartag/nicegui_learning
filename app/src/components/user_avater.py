@@ -1,5 +1,6 @@
 from nicegui import ui
-from state.user_state import UserState
+
+from src.state.user_state import UserState
 
 
 class UserAvatar(ui.avatar):

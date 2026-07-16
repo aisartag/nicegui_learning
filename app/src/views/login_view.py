@@ -1,19 +1,21 @@
 import logging
 from typing import Dict
 
-from auth.services.auth_service import AuthService
-from components.layout_events import loggedin_completed
-from core.log_loader import configExtra
-from exceptions import InvalidCredentialsException
-from nicegui import PageArguments, app, ui
+from nicegui import PageArguments, ui
 from pydantic import ValidationError
-from routing.route_interfaces import PROTECTED_ROUTE_DEFAULT, SIGNUP
-from schemas.login_schema import LoginSchema, get_clean_errors
-from state.user_state import UserStorage
+
+from src.auth.services.auth_service import AuthService
+from src.components.layout_events import loggedin_completed
+from src.core.setting_setup import SettingInit
+from src.exceptions import InvalidCredentialsException
+from src.routing.route_interfaces import PROTECTED_ROUTE_DEFAULT, SIGNUP
+from src.schemas.login_schema import LoginSchema, get_clean_errors
+from src.state.user_state import UserStateService
 
 NAME = 'Login'
 
-logger = logging.getLogger(f'{configExtra["root_name"]}.{__name__}')
+settings = SettingInit()
+logger = logging.getLogger(f'{settings.get_app_name()}.{__name__}')
 
 
 class FormData:
@@ -45,12 +47,7 @@ class UserLoginView:
 			user_orm = await auth_service.verify_credential(data.email, data.password)
 
 			if user_orm:
-				app.storage.user['authenticated'] = True
-				app.storage.user['user_id'] = user_orm.id
-				app.storage.user['username'] = user_orm.username
-
-				# attach UserStorage per session
-				await UserStorage.login_user(user_orm)
+				UserStateService.on_login(user_orm)
 
 				ui.notify(f"Login effettuato. Benvenuto '{user_orm.username}'!")
 
